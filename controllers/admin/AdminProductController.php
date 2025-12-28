@@ -22,7 +22,7 @@ class AdminProductController extends Controller
     public function index(): void
     {
         $page = (int) $this->get('page', 1);
-        $storeId = Session::get('current_store_id', 1);
+        $storeId = Session::get('admin_store_id', 1);
 
         $products = $this->productModel->getAllAdmin($page, 20, $storeId);
 
@@ -40,11 +40,12 @@ class AdminProductController extends Controller
      */
     public function create(): void
     {
-        $storeId = Session::get('current_store_id', 1);
+        $storeId = Session::get('admin_store_id', 1);
 
         $data = [
             'pageTitle' => 'Add Product - Admin',
             'categories' => $this->categoryModel->getAllAdmin($storeId),
+            'colors' => $this->getColors($storeId),
             'stores' => (new Store())->getActive()
         ];
 
@@ -56,7 +57,7 @@ class AdminProductController extends Controller
      */
     public function store(): void
     {
-        $storeId = Session::get('current_store_id', 1);
+        $storeId = Session::get('admin_store_id', 1);
 
         $data = [
             'store_id' => $storeId,
@@ -69,7 +70,7 @@ class AdminProductController extends Controller
             'sale_price' => $this->post('sale_price') ? (float) $this->post('sale_price') : null,
             'cost_price' => $this->post('cost_price') ? (float) $this->post('cost_price') : null,
             'sku' => $this->post('sku'),
-            'stock_quantity' => (int) $this->post('stock_quantity', 0),
+            'stock_quantity' => 0, // Will be calculated from variants
             'low_stock_threshold' => (int) $this->post('low_stock_threshold', 5),
             'is_featured' => $this->post('is_featured') ? 1 : 0,
             'is_new' => $this->post('is_new') ? 1 : 0,
@@ -108,13 +109,12 @@ class AdminProductController extends Controller
             }
         }
 
-        // Handle variants
-        $sizes = $this->post('variant_sizes', []);
-        $colors = $this->post('variant_colors', []);
+        // Handle variants (new format: variants[colorId][size] = quantity)
+        $variants = $this->post('variants', []);
+        $totalStock = $this->saveVariants($productId, $variants, $storeId);
 
-        if (!empty($sizes) || !empty($colors)) {
-            $this->createVariants($productId, $sizes, $colors);
-        }
+        // Update total stock
+        $this->productModel->update($productId, ['stock_quantity' => $totalStock]);
 
         $this->redirect('admin/products', 'Product created successfully');
     }
@@ -131,7 +131,7 @@ class AdminProductController extends Controller
             return;
         }
 
-        $storeId = Session::get('current_store_id', 1);
+        $storeId = Session::get('admin_store_id', 1);
 
         $data = [
             'pageTitle' => 'Edit Product - Admin',
@@ -139,6 +139,7 @@ class AdminProductController extends Controller
             'images' => $this->productModel->getImages($id),
             'variants' => $this->productModel->getVariants($id),
             'categories' => $this->categoryModel->getAllAdmin($storeId),
+            'colors' => $this->getColors($storeId),
             'stores' => (new Store())->getActive()
         ];
 
@@ -150,6 +151,8 @@ class AdminProductController extends Controller
      */
     public function update(int $id): void
     {
+        $storeId = Session::get('admin_store_id', 1);
+
         $data = [
             'category_id' => $this->post('category_id') ?: null,
             'name' => $this->post('name'),
@@ -160,7 +163,6 @@ class AdminProductController extends Controller
             'sale_price' => $this->post('sale_price') ? (float) $this->post('sale_price') : null,
             'cost_price' => $this->post('cost_price') ? (float) $this->post('cost_price') : null,
             'sku' => $this->post('sku'),
-            'stock_quantity' => (int) $this->post('stock_quantity', 0),
             'low_stock_threshold' => (int) $this->post('low_stock_threshold', 5),
             'is_featured' => $this->post('is_featured') ? 1 : 0,
             'is_new' => $this->post('is_new') ? 1 : 0,
@@ -179,6 +181,19 @@ class AdminProductController extends Controller
             }
         }
 
+        // Handle variants update
+        $variants = $this->post('variants', []);
+        if (!empty($variants)) {
+            // Delete existing variants
+            $this->db->delete('product_variants', 'product_id = ?', [$id]);
+
+            // Save new variants
+            $totalStock = $this->saveVariants($id, $variants, $storeId);
+
+            // Update total stock
+            $this->productModel->update($id, ['stock_quantity' => $totalStock]);
+        }
+
         $this->redirect('admin/products/edit/' . $id, 'Product updated successfully');
     }
 
@@ -192,39 +207,48 @@ class AdminProductController extends Controller
     }
 
     /**
-     * Create product variants
+     * Save product variants
      */
-    private function createVariants(int $productId, array $sizes, array $colors): void
+    private function saveVariants(int $productId, array $variants, int $storeId): int
     {
-        if (!empty($sizes) && !empty($colors)) {
-            foreach ($sizes as $size) {
-                foreach ($colors as $color) {
-                    $this->productModel->addVariant($productId, [
-                        'size' => $size,
-                        'color' => $color['name'] ?? $color,
-                        'color_code' => $color['code'] ?? null,
-                        'stock_quantity' => 10,
-                        'status' => 1
-                    ]);
-                }
-            }
-        } elseif (!empty($sizes)) {
-            foreach ($sizes as $size) {
+        $totalStock = 0;
+        $colors = $this->getColors($storeId);
+        $colorMap = [];
+        foreach ($colors as $color) {
+            $colorMap[$color['id']] = $color;
+        }
+
+        foreach ($variants as $colorId => $sizes) {
+            $colorInfo = $colorMap[$colorId] ?? null;
+
+            foreach ($sizes as $size => $quantity) {
+                $quantity = (int) $quantity;
+                if ($quantity < 0) $quantity = 0;
+
+                $totalStock += $quantity;
+
                 $this->productModel->addVariant($productId, [
+                    'color_id' => $colorId,
+                    'color' => $colorInfo['name'] ?? null,
+                    'color_code' => $colorInfo['color_code'] ?? null,
                     'size' => $size,
-                    'stock_quantity' => 10,
-                    'status' => 1
-                ]);
-            }
-        } elseif (!empty($colors)) {
-            foreach ($colors as $color) {
-                $this->productModel->addVariant($productId, [
-                    'color' => $color['name'] ?? $color,
-                    'color_code' => $color['code'] ?? null,
-                    'stock_quantity' => 10,
+                    'stock_quantity' => $quantity,
                     'status' => 1
                 ]);
             }
         }
+
+        return $totalStock;
+    }
+
+    /**
+     * Get available colors
+     */
+    private function getColors(int $storeId = 1): array
+    {
+        return $this->db->fetchAll(
+            "SELECT * FROM product_colors WHERE store_id = ? AND status = 1 ORDER BY sort_order, name",
+            [$storeId]
+        );
     }
 }

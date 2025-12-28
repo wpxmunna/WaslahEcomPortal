@@ -87,6 +87,13 @@ $router->add('admin/stores/update/{id}', 'AdminStoreController', 'update');
 $router->add('admin/stores/switch/{id}', 'AdminStoreController', 'switchStore');
 $router->add('admin/stores/delete/{id}', 'AdminStoreController', 'delete');
 
+// Admin Colors
+$router->add('admin/colors', 'AdminColorController', 'index');
+$router->add('admin/colors/store', 'AdminColorController', 'store');
+$router->add('admin/colors/update/{id}', 'AdminColorController', 'update');
+$router->add('admin/colors/delete/{id}', 'AdminColorController', 'delete');
+$router->add('admin/colors/reorder', 'AdminColorController', 'reorder');
+
 // Admin Couriers
 $router->add('admin/couriers', 'AdminCourierController', 'index');
 $router->add('admin/couriers/create', 'AdminCourierController', 'create');

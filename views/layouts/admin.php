@@ -66,6 +66,12 @@
                             <span>Categories</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="<?= url('admin/colors') ?>" class="nav-link <?= activeClass('admin/colors') ?>">
+                            <i class="fas fa-palette"></i>
+                            <span>Colors</span>
+                        </a>
+                    </li>
 
                     <li class="nav-header">Sales</li>
                     <li class="nav-item">

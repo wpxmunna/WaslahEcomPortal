@@ -5,6 +5,24 @@
     </a>
 </div>
 
+<?php
+// Organize existing variants by color
+$variantsByColor = [];
+foreach ($variants ?? [] as $variant) {
+    $colorId = $variant['color_id'] ?? $variant['color'] ?? 'default';
+    if (!isset($variantsByColor[$colorId])) {
+        $variantsByColor[$colorId] = [
+            'color_name' => $variant['color'] ?? 'Default',
+            'color_code' => $variant['color_code'] ?? '#cccccc',
+            'sizes' => []
+        ];
+    }
+    if ($variant['size']) {
+        $variantsByColor[$colorId]['sizes'][$variant['size']] = $variant['stock_quantity'];
+    }
+}
+?>
+
 <form action="<?= url('admin/products/update/' . $product['id']) ?>" method="POST" enctype="multipart/form-data">
     <?= csrfField() ?>
 
@@ -77,20 +95,59 @@
                 <div class="card-header">Inventory</div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">SKU</label>
                             <input type="text" class="form-control" name="sku"
                                    value="<?= sanitize($product['sku']) ?>">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Stock Quantity</label>
-                            <input type="number" class="form-control" name="stock_quantity"
-                                   value="<?= $product['stock_quantity'] ?>" min="0">
-                        </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Low Stock Threshold</label>
                             <input type="number" class="form-control" name="low_stock_threshold"
                                    value="<?= $product['low_stock_threshold'] ?>" min="0">
+                        </div>
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Total Stock: <strong><?= $product['stock_quantity'] ?></strong> (calculated from variants)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Size & Color Variants -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Size & Color Variants</span>
+                </div>
+                <div class="card-body">
+                    <!-- Available Colors Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Colors for this Product</label>
+                        <div class="d-flex flex-wrap gap-3" id="colorSelection">
+                            <?php foreach ($colors ?? [] as $color):
+                                $isSelected = isset($variantsByColor[$color['id']]) || isset($variantsByColor[$color['name']]);
+                            ?>
+                            <div class="form-check">
+                                <input class="form-check-input color-checkbox" type="checkbox"
+                                       name="selected_colors[]"
+                                       value="<?= $color['id'] ?>"
+                                       data-color-name="<?= $color['name'] ?>"
+                                       data-color-code="<?= $color['color_code'] ?>"
+                                       id="color_<?= $color['id'] ?>"
+                                       <?= $isSelected ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="color_<?= $color['id'] ?>">
+                                    <span class="color-swatch" style="background: <?= $color['color_code'] ?>; <?= $color['color_code'] === '#FFFFFF' ? 'border: 1px solid #ddd;' : '' ?>"></span>
+                                    <?= $color['name'] ?>
+                                </label>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- Size Quantities per Color -->
+                    <div id="variantsContainer">
+                        <div class="alert alert-secondary text-center" id="noColorSelected" style="<?= !empty($variantsByColor) ? 'display:none;' : '' ?>">
+                            <i class="fas fa-palette me-2"></i>
+                            Select colors above to add size quantities
                         </div>
                     </div>
                 </div>
@@ -114,46 +171,6 @@
                         </div>
                         <?php endforeach; ?>
                     </div>
-                </div>
-            </div>
-            <?php endif; ?>
-
-            <!-- Existing Variants -->
-            <?php if (!empty($variants)): ?>
-            <div class="card mb-4">
-                <div class="card-header">Current Variants</div>
-                <div class="card-body">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Size</th>
-                                <th>Color</th>
-                                <th>Stock</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($variants as $variant): ?>
-                            <tr>
-                                <td><?= $variant['size'] ?: '-' ?></td>
-                                <td>
-                                    <?php if ($variant['color']): ?>
-                                    <span style="display: inline-block; width: 15px; height: 15px; background: <?= $variant['color_code'] ?: $variant['color'] ?>; border: 1px solid #ddd; border-radius: 3px; vertical-align: middle;"></span>
-                                    <?= $variant['color'] ?>
-                                    <?php else: ?>
-                                    -
-                                    <?php endif; ?>
-                                </td>
-                                <td><?= $variant['stock_quantity'] ?></td>
-                                <td>
-                                    <span class="badge <?= $variant['status'] ? 'bg-success' : 'bg-secondary' ?>">
-                                        <?= $variant['status'] ? 'Active' : 'Inactive' ?>
-                                    </span>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
                 </div>
             </div>
             <?php endif; ?>
@@ -256,3 +273,156 @@
         </div>
     </div>
 </form>
+
+<style>
+.color-swatch {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.color-variant-card {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+}
+.color-variant-card .color-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+.color-variant-card .color-header .color-swatch {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+.size-qty-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+}
+.size-qty-item {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+}
+.size-qty-item label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #495057;
+}
+.size-qty-item input {
+    width: 100%;
+    text-align: center;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 5px;
+}
+.remove-color-btn {
+    margin-left: auto;
+    color: #dc3545;
+    cursor: pointer;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    const variantsContainer = document.getElementById('variantsContainer');
+    const noColorSelected = document.getElementById('noColorSelected');
+    const colorCheckboxes = document.querySelectorAll('.color-checkbox');
+
+    // Existing variants data from PHP
+    const existingVariants = <?= json_encode($variantsByColor) ?>;
+
+    // Initialize existing variants
+    colorCheckboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            const colorId = checkbox.value;
+            const colorName = checkbox.dataset.colorName;
+            const colorCode = checkbox.dataset.colorCode;
+
+            // Get existing quantities for this color
+            const existingQty = existingVariants[colorId]?.sizes || existingVariants[colorName]?.sizes || {};
+            addColorVariant(colorId, colorName, colorCode, existingQty);
+        }
+
+        checkbox.addEventListener('change', function() {
+            const colorId = this.value;
+            const colorName = this.dataset.colorName;
+            const colorCode = this.dataset.colorCode;
+
+            if (this.checked) {
+                const existingQty = existingVariants[colorId]?.sizes || existingVariants[colorName]?.sizes || {};
+                addColorVariant(colorId, colorName, colorCode, existingQty);
+            } else {
+                removeColorVariant(colorId);
+            }
+            updateNoColorMessage();
+        });
+    });
+
+    updateNoColorMessage();
+
+    function addColorVariant(colorId, colorName, colorCode, existingQty = {}) {
+        // Don't add if already exists
+        if (document.getElementById('variant_color_' + colorId)) return;
+
+        const card = document.createElement('div');
+        card.className = 'color-variant-card';
+        card.id = 'variant_color_' + colorId;
+
+        let sizesHtml = '';
+        sizes.forEach(size => {
+            const qty = existingQty[size] || 0;
+            sizesHtml += `
+                <div class="size-qty-item">
+                    <label>${size}</label>
+                    <input type="number" name="variants[${colorId}][${size}]"
+                           value="${qty}" min="0" placeholder="Qty">
+                </div>
+            `;
+        });
+
+        card.innerHTML = `
+            <div class="color-header">
+                <span class="color-swatch" style="background: ${colorCode}; ${colorCode === '#FFFFFF' ? 'border: 1px solid #ddd;' : ''}"></span>
+                <strong>${colorName}</strong>
+                <span class="remove-color-btn" onclick="document.getElementById('color_${colorId}').click()">
+                    <i class="fas fa-times"></i>
+                </span>
+            </div>
+            <div class="size-qty-grid">
+                ${sizesHtml}
+            </div>
+            <div class="mt-2">
+                <small class="text-muted">Enter quantity for each size</small>
+            </div>
+        `;
+
+        variantsContainer.appendChild(card);
+    }
+
+    function removeColorVariant(colorId) {
+        const card = document.getElementById('variant_color_' + colorId);
+        if (card) {
+            card.remove();
+        }
+    }
+
+    function updateNoColorMessage() {
+        const hasVariants = variantsContainer.querySelectorAll('.color-variant-card').length > 0;
+        noColorSelected.style.display = hasVariants ? 'none' : 'block';
+    }
+});
+</script>
