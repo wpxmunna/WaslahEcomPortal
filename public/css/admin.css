@@ -90,7 +90,37 @@ body {
 .sidebar-brand {
     color: var(--white);
     text-decoration: none;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-brand .admin-logo {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: var(--white);
+    padding: 4px;
+}
+
+.sidebar-brand .brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-brand .brand-text span {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1.2;
+}
+
+.sidebar-brand .brand-text small {
+    font-size: 11px;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .sidebar-brand span {

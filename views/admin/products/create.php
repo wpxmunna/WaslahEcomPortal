@@ -97,8 +97,11 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Size & Color Variants</span>
-                    <button type="button" class="btn btn-sm btn-primary" id="addColorBtn">
-                        <i class="fas fa-plus me-1"></i> Add Color
+                    <a href="<?= url('admin/colors') ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-cog me-1"></i> Manage Colors
+                    </a>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddColorModal">
+                        <i class="fas fa-plus me-1"></i> Quick Add
                     </button>
                 </div>
                 <div class="card-body">
@@ -224,6 +227,41 @@
         </div>
     </div>
 </form>
+
+<!-- Quick Add Color Modal -->
+<div class="modal fade" id="quickAddColorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Add Color</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Color Name *</label>
+                    <input type="text" class="form-control" id="newColorName" placeholder="e.g., Sky Blue">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Color Code *</label>
+                    <div class="input-group">
+                        <input type="color" class="form-control form-control-color" id="newColorPicker" value="#000000">
+                        <input type="text" class="form-control" id="newColorCode" value="#000000" placeholder="#000000">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Preview</label>
+                    <div id="newColorPreview" style="width:100%;height:50px;border-radius:8px;background:#000000;border:1px solid #ddd;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveNewColorBtn">
+                    <i class="fas fa-save me-1"></i> Save Color
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
 .color-swatch {
@@ -365,6 +403,107 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = e => preview.src = e.target.result;
                 reader.readAsDataURL(this.files[0]);
             }
+        });
+    });
+
+    // Quick Add Color functionality
+    const newColorPicker = document.getElementById('newColorPicker');
+    const newColorCode = document.getElementById('newColorCode');
+    const newColorPreview = document.getElementById('newColorPreview');
+
+    if (newColorPicker) {
+        newColorPicker.addEventListener('input', function() {
+            newColorCode.value = this.value.toUpperCase();
+            newColorPreview.style.background = this.value;
+        });
+
+        newColorCode.addEventListener('input', function() {
+            if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+                newColorPicker.value = this.value;
+                newColorPreview.style.background = this.value;
+            }
+        });
+    }
+
+    // Save new color via AJAX
+    document.getElementById('saveNewColorBtn')?.addEventListener('click', function() {
+        const btn = this;
+        const name = document.getElementById('newColorName').value.trim();
+        const colorCode = document.getElementById('newColorCode').value.trim();
+
+        if (!name || !colorCode) {
+            alert('Please enter both color name and code');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
+
+        // Send AJAX request to save color
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('color_code', colorCode);
+        formData.append('ajax', '1');
+
+        fetch('<?= url('admin/colors/store') ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save me-1"></i> Save Color';
+
+            if (data.success) {
+                const colorId = data.color.id;
+
+                // Add new color to the selection list
+                const colorSelection = document.getElementById('colorSelection');
+                const div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML = `
+                    <input class="form-check-input color-checkbox" type="checkbox"
+                           name="selected_colors[]"
+                           value="${colorId}"
+                           data-color-name="${name}"
+                           data-color-code="${colorCode}"
+                           id="color_${colorId}" checked>
+                    <label class="form-check-label" for="color_${colorId}">
+                        <span class="color-swatch" style="background: ${colorCode}; ${colorCode === '#FFFFFF' ? 'border: 1px solid #ddd;' : ''}"></span>
+                        ${name}
+                    </label>
+                `;
+                colorSelection.appendChild(div);
+
+                // Add variant card for the new color
+                addColorVariant(colorId, name, colorCode);
+                updateNoColorMessage();
+
+                // Attach event listener to new checkbox
+                div.querySelector('.color-checkbox').addEventListener('change', function() {
+                    if (this.checked) {
+                        addColorVariant(this.value, this.dataset.colorName, this.dataset.colorCode);
+                    } else {
+                        removeColorVariant(this.value);
+                    }
+                    updateNoColorMessage();
+                });
+
+                // Close modal and reset form
+                bootstrap.Modal.getInstance(document.getElementById('quickAddColorModal')).hide();
+                document.getElementById('newColorName').value = '';
+                document.getElementById('newColorCode').value = '#000000';
+                document.getElementById('newColorPicker').value = '#000000';
+                document.getElementById('newColorPreview').style.background = '#000000';
+            } else {
+                alert(data.message || 'Failed to save color');
+            }
+        })
+        .catch(error => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save me-1"></i> Save Color';
+            console.error('Error:', error);
+            alert('Failed to save color. Please try again.');
         });
     });
 });

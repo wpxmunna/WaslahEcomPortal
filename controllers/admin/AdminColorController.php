@@ -41,8 +41,15 @@ class AdminColorController extends Controller
 
         $name = trim($this->post('name'));
         $colorCode = trim($this->post('color_code'));
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) ||
+                  (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) ||
+                  $this->post('ajax');
 
         if (empty($name) || empty($colorCode)) {
+            if ($isAjax) {
+                $this->json(['success' => false, 'message' => 'Name and color code are required']);
+                return;
+            }
             $this->redirect('admin/colors', 'Name and color code are required', 'error');
             return;
         }
@@ -54,6 +61,10 @@ class AdminColorController extends Controller
         );
 
         if ($existing) {
+            if ($isAjax) {
+                $this->json(['success' => false, 'message' => 'Color already exists']);
+                return;
+            }
             $this->redirect('admin/colors', 'Color already exists', 'error');
             return;
         }
@@ -64,13 +75,26 @@ class AdminColorController extends Controller
             [$storeId]
         );
 
-        $this->db->insert('product_colors', [
+        $colorId = $this->db->insert('product_colors', [
             'store_id' => $storeId,
             'name' => $name,
             'color_code' => $colorCode,
             'sort_order' => ($maxSort['max_sort'] ?? 0) + 1,
             'status' => 1
         ]);
+
+        if ($isAjax) {
+            $this->json([
+                'success' => true,
+                'message' => 'Color added successfully',
+                'color' => [
+                    'id' => $colorId,
+                    'name' => $name,
+                    'color_code' => $colorCode
+                ]
+            ]);
+            return;
+        }
 
         $this->redirect('admin/colors', 'Color added successfully');
     }

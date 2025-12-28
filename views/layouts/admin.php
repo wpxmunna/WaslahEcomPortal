@@ -27,7 +27,10 @@
             <div class="sidebar-header">
                 <a href="<?= url('admin') ?>" class="sidebar-brand">
                     <img src="<?= asset('images/logo.png') ?>" alt="Waslah" class="admin-logo">
-                    <small>Admin Panel</small>
+                    <div class="brand-text">
+                        <span>WASLAH</span>
+                        <small>Admin Panel</small>
+                    </div>
                 </a>
             </div>
 
