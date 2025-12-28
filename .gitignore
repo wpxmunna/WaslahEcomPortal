@@ -1,0 +1,32 @@
+# Logs
+logs/
+*.log
+
+# Uploads (user content)
+uploads/*
+!uploads/.htaccess
+!uploads/.gitkeep
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Sensitive files
+config/database.local.php
