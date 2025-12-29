@@ -56,12 +56,12 @@ class Router
                 $action = $this->params['action'];
 
                 if (method_exists($controllerObj, $action)) {
-                    // Extract route parameters
+                    // Extract route parameters (use array_values for positional args in PHP 8+)
                     $routeParams = array_filter($this->params, function($key) {
                         return !in_array($key, ['controller', 'action']);
                     }, ARRAY_FILTER_USE_KEY);
 
-                    call_user_func_array([$controllerObj, $action], $routeParams);
+                    call_user_func_array([$controllerObj, $action], array_values($routeParams));
                 } else {
                     $this->error404("Method {$action} not found in {$controller}");
                 }
