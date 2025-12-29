@@ -239,9 +239,28 @@ class PathaoService
             ];
         }
 
+        // Extract detailed error message
+        $errorMsg = 'Failed to create Pathao order';
+        if ($response) {
+            if (isset($response['message'])) {
+                $errorMsg = $response['message'];
+            }
+            if (isset($response['errors']) && is_array($response['errors'])) {
+                $errorDetails = [];
+                foreach ($response['errors'] as $field => $errors) {
+                    $errorDetails[] = $field . ': ' . (is_array($errors) ? implode(', ', $errors) : $errors);
+                }
+                if (!empty($errorDetails)) {
+                    $errorMsg .= ' - ' . implode('; ', $errorDetails);
+                }
+            }
+        }
+
+        logMessage("Pathao createOrder failed: " . $errorMsg . " | Payload: " . json_encode($payload), 'error');
+
         return [
             'success' => false,
-            'error' => $response['message'] ?? 'Failed to create Pathao order'
+            'error' => $errorMsg
         ];
     }
 

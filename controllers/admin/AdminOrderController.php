@@ -224,9 +224,10 @@ class AdminOrderController extends Controller
         $result = $this->createPathaoOrder($id);
 
         if ($result && $result['success']) {
-            $this->json(['success' => true, 'message' => $result['message'], 'data' => $result]);
+            $this->json(['success' => true, 'message' => $result['message'] ?? 'Pathao order created', 'data' => $result]);
         } else {
-            $this->json(['success' => false, 'message' => $result['error'] ?? 'Failed to create Pathao order']);
+            $errorMsg = $result['error'] ?? 'Failed to create Pathao order';
+            $this->json(['success' => false, 'message' => $errorMsg, 'details' => $result]);
         }
     }
 
