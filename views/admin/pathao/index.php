@@ -1,4 +1,13 @@
 <div class="container-fluid py-4">
+    <!-- Debug Info -->
+    <?php if (isset($debug_store_id)): ?>
+    <div class="alert alert-secondary small mb-3">
+        <strong>Debug:</strong> Store ID: <?= $debug_store_id ?> |
+        Pathao Enabled: <?= $settings['pathao_enabled'] ?? 'not set' ?> |
+        Environment: <?= $settings['pathao_environment'] ?? 'not set' ?>
+    </div>
+    <?php endif; ?>
+
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
