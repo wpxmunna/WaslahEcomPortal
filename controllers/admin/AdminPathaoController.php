@@ -17,15 +17,26 @@ class AdminPathaoController extends Controller
     public function index()
     {
         $storeId = Session::get('admin_store_id', 1);
+
+        // Ensure store_id 1 exists if not set
+        if (!$storeId) {
+            $storeId = 1;
+            Session::set('admin_store_id', 1);
+        }
+
         $settings = $this->getPathaoSettings($storeId);
 
-        // Debug: Log what we're loading
-        logMessage("Pathao index - store_id: {$storeId}, pathao_enabled: " . ($settings['pathao_enabled'] ?? 'not set'), 'info');
+        // Debug: Check directly from database
+        $dbCheck = $this->db->fetch(
+            "SELECT * FROM settings WHERE setting_key = 'pathao_enabled' AND store_id = ?",
+            [$storeId]
+        );
 
         $this->view('admin/pathao/index', [
             'pageTitle' => 'Pathao Courier Settings',
             'settings' => $settings,
-            'debug_store_id' => $storeId
+            'debug_store_id' => $storeId,
+            'debug_db_check' => $dbCheck
         ], 'admin');
     }
 
@@ -87,6 +98,39 @@ class AdminPathaoController extends Controller
         $result = $pathao->testConnection();
 
         $this->json($result);
+    }
+
+    /**
+     * Force enable Pathao (debug endpoint)
+     */
+    public function forceEnable()
+    {
+        $storeId = Session::get('admin_store_id', 1);
+        if (!$storeId) $storeId = 1;
+
+        try {
+            // Check if setting exists
+            $existing = $this->db->fetch(
+                "SELECT id FROM settings WHERE store_id = ? AND setting_key = 'pathao_enabled'",
+                [$storeId]
+            );
+
+            if ($existing) {
+                $this->db->query(
+                    "UPDATE settings SET setting_value = '1', updated_at = NOW() WHERE id = ?",
+                    [$existing['id']]
+                );
+                $this->json(['success' => true, 'message' => 'Updated existing setting to enabled', 'id' => $existing['id']]);
+            } else {
+                $this->db->query(
+                    "INSERT INTO settings (store_id, setting_key, setting_value, created_at, updated_at) VALUES (?, 'pathao_enabled', '1', NOW(), NOW())",
+                    [$storeId]
+                );
+                $this->json(['success' => true, 'message' => 'Inserted new setting', 'store_id' => $storeId]);
+            }
+        } catch (Exception $e) {
+            $this->json(['success' => false, 'error' => $e->getMessage()]);
+        }
     }
 
     public function stores()

@@ -119,6 +119,7 @@ $router->add('admin/reports/export', 'AdminReportController', 'export');
 $router->add('admin/pathao', 'AdminPathaoController', 'index');
 $router->add('admin/pathao/update', 'AdminPathaoController', 'update');
 $router->add('admin/pathao/test', 'AdminPathaoController', 'test');
+$router->add('admin/pathao/force-enable', 'AdminPathaoController', 'forceEnable');
 $router->add('admin/pathao/stores', 'AdminPathaoController', 'stores');
 $router->add('admin/pathao/cities', 'AdminPathaoController', 'cities');
 $router->add('admin/pathao/zones/{cityId}', 'AdminPathaoController', 'zones');

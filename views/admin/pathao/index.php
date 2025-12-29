@@ -1,16 +1,35 @@
 <div class="container-fluid py-4">
     <!-- Debug Info -->
     <?php if (isset($debug_store_id)): ?>
-    <div class="alert alert-secondary small mb-3">
+    <div class="alert alert-warning small mb-3">
         <strong>Debug:</strong> Store ID: <?= $debug_store_id ?> |
-        Pathao Enabled: <strong><?= $settings['pathao_enabled'] ?? 'not set' ?></strong> |
-        Environment: <?= $settings['pathao_environment'] ?? 'not set' ?> |
-        Store ID in Settings: <?= $settings['pathao_store_id'] ?? 'not set' ?>
+        Pathao Enabled (from settings array): <strong><?= $settings['pathao_enabled'] ?? 'not set' ?></strong> |
+        <br>
+        <strong>Direct DB Check:</strong>
+        <?php if (isset($debug_db_check) && $debug_db_check): ?>
+            Found! ID: <?= $debug_db_check['id'] ?>, Value: <strong><?= $debug_db_check['setting_value'] ?></strong>
+        <?php else: ?>
+            <span class="text-danger">NOT FOUND in database!</span>
+        <?php endif; ?>
+        <button type="button" class="btn btn-sm btn-success ms-3" onclick="forceEnable()">
+            <i class="fas fa-bolt"></i> Force Enable Pathao
+        </button>
         <details class="mt-2">
-            <summary>All Settings</summary>
+            <summary>All Settings Array</summary>
             <pre style="font-size: 11px; max-height: 200px; overflow: auto;"><?= print_r($settings, true) ?></pre>
         </details>
     </div>
+    <script>
+    function forceEnable() {
+        fetch('<?= url('admin/pathao/force-enable') ?>')
+            .then(r => r.json())
+            .then(data => {
+                alert(JSON.stringify(data));
+                if (data.success) location.reload();
+            })
+            .catch(e => alert('Error: ' + e.message));
+    }
+    </script>
     <?php endif; ?>
 
     <!-- Page Header -->
