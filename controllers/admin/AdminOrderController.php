@@ -120,7 +120,7 @@ class AdminOrderController extends Controller
 
         // Check if Pathao is enabled
         if (!$pathao->isEnabled()) {
-            return null;
+            return ['success' => false, 'error' => 'Pathao is not enabled. Go to Admin → Pathao Courier to enable it.'];
         }
 
         // Get order details
