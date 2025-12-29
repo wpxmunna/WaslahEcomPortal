@@ -103,7 +103,7 @@
             <div class="<?= $colClass ?> col-md-6">
                 <a href="<?= url('shop/category/' . $category['slug']) ?>" class="category-block">
                     <div class="category-image">
-                        <img src="<?= $imageUrl ?>" alt="<?= $category['name'] ?>" loading="lazy" decoding="async">
+                        <img src="<?= $imageUrl ?>" alt="<?= $category['name'] ?>" loading="<?= $index < 2 ? 'eager' : 'lazy' ?>" decoding="async">
                     </div>
                     <div class="category-info">
                         <h3><?= $category['name'] ?></h3>
@@ -130,7 +130,7 @@
         </div>
 
         <div class="products-grid">
-            <?php foreach (array_slice($newArrivals, 0, 8) as $product): ?>
+            <?php $productIndex = 0; foreach (array_slice($newArrivals, 0, 8) as $product): ?>
             <div class="product-item">
                 <div class="product-card-modern">
                     <div class="product-image">
@@ -138,7 +138,7 @@
                             <?php
                             $imgSrc = $product['image'] ? upload($product['image']) : 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80';
                             ?>
-                            <img src="<?= $imgSrc ?>" alt="<?= sanitize($product['name']) ?>" class="img-primary" loading="lazy" decoding="async">
+                            <img src="<?= $imgSrc ?>" alt="<?= sanitize($product['name']) ?>" class="img-primary" loading="<?= $productIndex < 4 ? 'eager' : 'lazy' ?>" decoding="async" width="320" height="320">
                         </a>
                         <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
                         <span class="product-badge sale">-<?= discountPercent($product['price'], $product['sale_price']) ?>%</span>
@@ -174,7 +174,7 @@
                     </div>
                 </div>
             </div>
-            <?php endforeach; ?>
+            <?php $productIndex++; endforeach; ?>
         </div>
     </div>
 </section>
@@ -237,7 +237,7 @@
                             <?php
                             $imgSrc = $product['image'] ? upload($product['image']) : 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80';
                             ?>
-                            <img src="<?= $imgSrc ?>" alt="<?= sanitize($product['name']) ?>" class="img-primary" loading="lazy" decoding="async">
+                            <img src="<?= $imgSrc ?>" alt="<?= sanitize($product['name']) ?>" class="img-primary" loading="lazy" decoding="async" width="320" height="320">
                         </a>
                         <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
                         <span class="product-badge sale">-<?= discountPercent($product['price'], $product['sale_price']) ?>%</span>

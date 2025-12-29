@@ -2,7 +2,7 @@
     <div class="product-image">
         <a href="<?= url('product/' . $product['slug']) ?>">
             <?php if ($product['image']): ?>
-            <img src="<?= upload($product['image']) ?>" alt="<?= sanitize($product['name']) ?>">
+            <img src="<?= upload($product['image']) ?>" alt="<?= sanitize($product['name']) ?>" loading="lazy" decoding="async" width="280" height="280">
             <?php else: ?>
             <div class="img-placeholder" style="height: 100%;"><i class="fas fa-image"></i></div>
             <?php endif; ?>

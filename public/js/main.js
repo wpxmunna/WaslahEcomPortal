@@ -287,9 +287,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ============================================
-    // Lazy Loading Images
+    // Image Loading Handler
     // ============================================
 
+    // Handle lazy loaded images - add loaded class for fade-in
+    function handleImageLoad(img) {
+        img.classList.add('loaded');
+    }
+
+    // Process all lazy images
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+        if (img.complete) {
+            handleImageLoad(img);
+        } else {
+            img.addEventListener('load', () => handleImageLoad(img));
+            img.addEventListener('error', () => {
+                img.classList.add('loaded');
+                img.style.background = '#f0f0f0';
+            });
+        }
+    });
+
+    // Observe new images added dynamically
+    const imgObserver = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === 1) {
+                    const imgs = node.tagName === 'IMG' ? [node] : node.querySelectorAll?.('img[loading="lazy"]') || [];
+                    imgs.forEach(img => {
+                        if (img.complete) {
+                            handleImageLoad(img);
+                        } else {
+                            img.addEventListener('load', () => handleImageLoad(img));
+                        }
+                    });
+                }
+            });
+        });
+    });
+    imgObserver.observe(document.body, { childList: true, subtree: true });
+
+    // Lazy Loading Images with data-src
     if ('IntersectionObserver' in window) {
         const imageObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {

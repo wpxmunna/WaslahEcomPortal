@@ -42,10 +42,31 @@ html {
     }
 }
 
-/* Image loading states */
+/* Image loading states with skeleton animation */
 img[loading="lazy"] {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
     background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+img[loading="lazy"].loaded,
+img:not([loading="lazy"]) {
+    opacity: 1;
+    animation: none;
+    background: none;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Eager load above-fold images */
+img[loading="eager"] {
+    opacity: 1;
+    animation: none;
 }
 
 /* Ensure Font Awesome icons display properly */
