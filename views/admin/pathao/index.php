@@ -3,8 +3,13 @@
     <?php if (isset($debug_store_id)): ?>
     <div class="alert alert-secondary small mb-3">
         <strong>Debug:</strong> Store ID: <?= $debug_store_id ?> |
-        Pathao Enabled: <?= $settings['pathao_enabled'] ?? 'not set' ?> |
-        Environment: <?= $settings['pathao_environment'] ?? 'not set' ?>
+        Pathao Enabled: <strong><?= $settings['pathao_enabled'] ?? 'not set' ?></strong> |
+        Environment: <?= $settings['pathao_environment'] ?? 'not set' ?> |
+        Store ID in Settings: <?= $settings['pathao_store_id'] ?? 'not set' ?>
+        <details class="mt-2">
+            <summary>All Settings</summary>
+            <pre style="font-size: 11px; max-height: 200px; overflow: auto;"><?= print_r($settings, true) ?></pre>
+        </details>
     </div>
     <?php endif; ?>
 
