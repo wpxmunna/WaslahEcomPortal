@@ -41,6 +41,9 @@ class PathaoService
             $config[$setting['setting_key']] = $setting['setting_value'];
         }
 
+        // Debug: Log loaded settings
+        logMessage("PathaoService loadSettings - storeId: {$this->storeId}, pathao_store_id from DB: '" . ($config['pathao_store_id'] ?? 'NOT FOUND') . "'", 'info');
+
         $this->isSandbox = ($config['pathao_environment'] ?? 'sandbox') === 'sandbox';
 
         if ($this->isSandbox) {
@@ -196,8 +199,11 @@ class PathaoService
             return ['success' => false, 'error' => 'Failed to get access token'];
         }
 
-        if (!$this->pathaoStoreId) {
-            return ['success' => false, 'error' => 'Pathao store ID not configured'];
+        // Log the current pathaoStoreId for debugging
+        logMessage("Pathao createOrder - pathaoStoreId value: '" . ($this->pathaoStoreId ?? 'NULL') . "'", 'info');
+
+        if (empty($this->pathaoStoreId)) {
+            return ['success' => false, 'error' => 'Pathao store ID not configured. Please set it in Admin → Pathao settings.'];
         }
 
         // Prepare order payload
