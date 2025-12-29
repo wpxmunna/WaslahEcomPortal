@@ -40,7 +40,7 @@ class AdminCourierController extends Controller
         }
 
         // Verify CSRF
-        if (!Session::verifyCsrf($_POST['csrf_token'] ?? '')) {
+        if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
             Session::flash('error', 'Invalid request');
             $this->redirect('admin/couriers/create');
         }
@@ -118,7 +118,7 @@ class AdminCourierController extends Controller
         }
 
         // Verify CSRF
-        if (!Session::verifyCsrf($_POST['csrf_token'] ?? '')) {
+        if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
             Session::flash('error', 'Invalid request');
             $this->redirect('admin/couriers/edit/' . $id);
         }

@@ -46,11 +46,10 @@ class AdminPathaoController extends Controller
             $this->redirect('admin/pathao');
         }
 
-        // Skip CSRF check for now to debug
-        // if (!Session::verifyCsrf($_POST['csrf_token'] ?? '')) {
-        //     Session::setFlash('Invalid request', 'error');
-        //     $this->redirect('admin/pathao');
-        // }
+        if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
+            Session::setFlash('Invalid request', 'error');
+            $this->redirect('admin/pathao');
+        }
 
         $storeId = Session::get('admin_store_id', 1);
 

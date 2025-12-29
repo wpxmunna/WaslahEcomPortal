@@ -35,7 +35,7 @@ class AdminSettingsController extends Controller
         }
 
         // Verify CSRF
-        if (!Session::verifyCsrf($_POST['csrf_token'] ?? '')) {
+        if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
             Session::flash('error', 'Invalid request');
             $this->redirect('admin/settings');
         }
@@ -103,7 +103,7 @@ class AdminSettingsController extends Controller
         }
 
         // Verify CSRF
-        if (!Session::verifyCsrf($_POST['csrf_token'] ?? '')) {
+        if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
             Session::flash('error', 'Invalid request');
             $this->redirect('admin/settings/payment');
         }
@@ -147,7 +147,7 @@ class AdminSettingsController extends Controller
         }
 
         // Verify CSRF
-        if (!Session::verifyCsrf($_POST['csrf_token'] ?? '')) {
+        if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
             Session::flash('error', 'Invalid request');
             $this->redirect('admin/settings/email');
         }
