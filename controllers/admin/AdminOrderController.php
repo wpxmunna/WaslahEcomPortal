@@ -273,4 +273,91 @@ class AdminOrderController extends Controller
 
         $this->view('admin/orders/invoice', $data, null);
     }
+
+    /**
+     * Update shipping details (AJAX)
+     */
+    public function updateShipping(int $id): void
+    {
+        $courier = $this->post('courier', '');
+        $shippingAmount = (float) $this->post('shipping_amount', 0);
+        $trackingNumber = trim($this->post('tracking_number', ''));
+
+        // Get order
+        $order = $this->orderModel->getWithDetails($id);
+        if (!$order) {
+            $this->json(['success' => false, 'message' => 'Order not found']);
+            return;
+        }
+
+        // Calculate new total
+        $subtotal = (float) $order['subtotal'];
+        $discount = (float) ($order['discount_amount'] ?? 0);
+        $tax = (float) ($order['tax_amount'] ?? 0);
+        $newTotal = $subtotal - $discount + $shippingAmount + $tax;
+
+        // Update order shipping amount and total
+        $this->db->query(
+            "UPDATE orders SET shipping_amount = ?, total_amount = ?, updated_at = NOW() WHERE id = ?",
+            [$shippingAmount, $newTotal, $id]
+        );
+
+        // Update or create shipment record
+        $courierName = $this->getCourierName($courier);
+
+        $existingShipment = $this->db->fetch(
+            "SELECT id FROM shipments WHERE order_id = ?",
+            [$id]
+        );
+
+        if ($existingShipment) {
+            $this->db->query(
+                "UPDATE shipments SET courier_name = ?, tracking_number = ?, delivery_fee = ?, updated_at = NOW() WHERE id = ?",
+                [$courierName, $trackingNumber, $shippingAmount, $existingShipment['id']]
+            );
+        } else if ($courier) {
+            $this->db->query(
+                "INSERT INTO shipments (order_id, courier_id, courier_name, tracking_number, status, delivery_fee, created_at, updated_at)
+                 VALUES (?, 0, ?, ?, 'pending', ?, NOW(), NOW())",
+                [$id, $courierName, $trackingNumber, $shippingAmount]
+            );
+        }
+
+        $this->json([
+            'success' => true,
+            'message' => 'Shipping updated',
+            'new_total' => formatPrice($newTotal)
+        ]);
+    }
+
+    /**
+     * Get courier display name
+     */
+    private function getCourierName(string $courier): string
+    {
+        $names = [
+            'pathao' => 'Pathao',
+            'steadfast' => 'Steadfast',
+            'redx' => 'RedX',
+            'sundarban' => 'Sundarban Courier',
+            'sa_paribahan' => 'SA Paribahan',
+            'other' => 'Other'
+        ];
+        return $names[$courier] ?? $courier;
+    }
+
+    /**
+     * Save admin notes (AJAX)
+     */
+    public function saveNotes(int $id): void
+    {
+        $notes = $this->post('admin_notes', '');
+
+        $this->db->query(
+            "UPDATE orders SET admin_notes = ?, updated_at = NOW() WHERE id = ?",
+            [$notes, $id]
+        );
+
+        $this->json(['success' => true, 'message' => 'Notes saved']);
+    }
 }

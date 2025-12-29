@@ -98,29 +98,13 @@
                         </div>
                     </div>
 
-                    <!-- Shipping Method -->
+                    <!-- Shipping Info Notice -->
                     <div class="checkout-section">
-                        <h3><i class="fas fa-shipping-fast me-2"></i> Shipping Method</h3>
-
-                        <?php foreach ($couriers as $index => $courier): ?>
-                        <div class="payment-method <?= $index === 0 ? 'active' : '' ?>" data-gateway="courier">
-                            <input type="radio" name="courier_id" value="<?= $courier['id'] ?>"
-                                   id="courier<?= $courier['id'] ?>" <?= $index === 0 ? 'checked' : '' ?>>
-                            <label for="courier<?= $courier['id'] ?>" class="d-flex justify-content-between align-items-center mb-0 w-100 ms-2">
-                                <span>
-                                    <strong><?= $courier['name'] ?></strong><br>
-                                    <small class="text-muted"><?= $courier['estimated_days'] ?></small>
-                                </span>
-                                <span class="fw-bold">
-                                    <?php if ($courier['base_rate'] > 0): ?>
-                                    <?= formatPrice($courier['base_rate']) ?>
-                                    <?php else: ?>
-                                    Free
-                                    <?php endif; ?>
-                                </span>
-                            </label>
+                        <h3><i class="fas fa-shipping-fast me-2"></i> Shipping</h3>
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Shipping charges will be calculated and confirmed by our team. You will be notified of the final shipping cost.
                         </div>
-                        <?php endforeach; ?>
                     </div>
 
                     <!-- Payment Method -->
@@ -218,12 +202,8 @@
 
                         <div class="summary-row">
                             <span>Shipping</span>
-                            <span id="shippingAmount">
-                                <?php if ($cart['shipping'] > 0): ?>
-                                <?= formatPrice($cart['shipping']) ?>
-                                <?php else: ?>
-                                <span class="text-success">Free</span>
-                                <?php endif; ?>
+                            <span id="shippingAmount" class="text-muted">
+                                <small>To be confirmed</small>
                             </span>
                         </div>
 

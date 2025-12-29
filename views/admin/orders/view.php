@@ -347,12 +347,58 @@
         </div>
         <?php endif; ?>
 
+        <!-- Shipping & Courier -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-truck me-2"></i> Shipping & Courier
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Courier Service</label>
+                    <select class="form-select" id="courierSelect">
+                        <option value="">-- Select Courier --</option>
+                        <option value="pathao" <?= ($order['shipment']['courier_name'] ?? '') === 'Pathao' ? 'selected' : '' ?>>Pathao</option>
+                        <option value="steadfast" <?= ($order['shipment']['courier_name'] ?? '') === 'Steadfast' ? 'selected' : '' ?>>Steadfast</option>
+                        <option value="redx" <?= ($order['shipment']['courier_name'] ?? '') === 'RedX' ? 'selected' : '' ?>>RedX</option>
+                        <option value="sundarban" <?= ($order['shipment']['courier_name'] ?? '') === 'Sundarban' ? 'selected' : '' ?>>Sundarban Courier</option>
+                        <option value="sa_paribahan" <?= ($order['shipment']['courier_name'] ?? '') === 'SA Paribahan' ? 'selected' : '' ?>>SA Paribahan</option>
+                        <option value="other" <?= ($order['shipment']['courier_name'] ?? '') === 'Other' ? 'selected' : '' ?>>Other</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Shipping Charge</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><?= CURRENCY_SYMBOL ?></span>
+                        <input type="number" class="form-control" id="shippingCharge"
+                               value="<?= $order['shipping_amount'] ?? 0 ?>" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tracking Number</label>
+                    <input type="text" class="form-control" id="trackingNumber"
+                           value="<?= $order['shipment']['tracking_number'] ?? '' ?>"
+                           placeholder="Enter tracking number">
+                </div>
+
+                <button class="btn btn-primary w-100" onclick="updateShipping(<?= $order['id'] ?>)">
+                    <i class="fas fa-save me-2"></i> Update Shipping
+                </button>
+
+                <div class="alert alert-info mt-3 mb-0 small">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Updating shipping will recalculate the order total.
+                </div>
+            </div>
+        </div>
+
         <!-- Admin Notes -->
         <div class="card mb-4">
             <div class="card-header">Admin Notes</div>
             <div class="card-body">
-                <textarea class="form-control" rows="3" placeholder="Internal notes..."><?= sanitize($order['admin_notes']) ?></textarea>
-                <button class="btn btn-sm btn-primary mt-2">Save Notes</button>
+                <textarea class="form-control" rows="3" id="adminNotes" placeholder="Internal notes..."><?= sanitize($order['admin_notes'] ?? '') ?></textarea>
+                <button class="btn btn-sm btn-primary mt-2" onclick="saveAdminNotes(<?= $order['id'] ?>)">Save Notes</button>
             </div>
         </div>
     </div>
@@ -466,6 +512,61 @@ function simulateShipment(shipmentId) {
         if (data.success) {
             location.reload();
         }
+    });
+}
+
+// Update shipping details
+function updateShipping(orderId) {
+    const courier = document.getElementById('courierSelect').value;
+    const shippingCharge = document.getElementById('shippingCharge').value;
+    const trackingNumber = document.getElementById('trackingNumber').value;
+
+    const formData = new FormData();
+    formData.append('courier', courier);
+    formData.append('shipping_amount', shippingCharge);
+    formData.append('tracking_number', trackingNumber);
+
+    fetch('<?= url('admin/orders/update-shipping') ?>/' + orderId, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Shipping updated successfully! New total: ' + data.new_total);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error updating shipping');
+        console.error(error);
+    });
+}
+
+// Save admin notes
+function saveAdminNotes(orderId) {
+    const notes = document.getElementById('adminNotes').value;
+
+    const formData = new FormData();
+    formData.append('admin_notes', notes);
+
+    fetch('<?= url('admin/orders/save-notes') ?>/' + orderId, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Notes saved successfully!');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error saving notes');
+        console.error(error);
     });
 }
 </script>

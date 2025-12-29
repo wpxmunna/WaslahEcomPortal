@@ -72,6 +72,8 @@ $router->add('admin/orders/status/{id}', 'AdminOrderController', 'updateStatus')
 $router->add('admin/orders/invoice/{id}', 'AdminOrderController', 'invoice');
 $router->add('admin/orders/pathao/{id}', 'AdminOrderController', 'createPathaoShipment');
 $router->add('admin/orders/pathao-status/{id}', 'AdminOrderController', 'pathaoStatus');
+$router->add('admin/orders/update-shipping/{id}', 'AdminOrderController', 'updateShipping');
+$router->add('admin/orders/save-notes/{id}', 'AdminOrderController', 'saveNotes');
 
 // Admin Customers
 $router->add('admin/customers', 'AdminCustomerController', 'index');
