@@ -201,6 +201,8 @@ CREATE TABLE orders (
 
     -- Pricing
     subtotal DECIMAL(10,2) NOT NULL,
+    coupon_id INT NULL,
+    coupon_code VARCHAR(50) NULL,
     discount_amount DECIMAL(10,2) DEFAULT 0.00,
     tax_amount DECIMAL(10,2) DEFAULT 0.00,
     shipping_amount DECIMAL(10,2) DEFAULT 0.00,
@@ -365,10 +367,13 @@ CREATE TABLE coupons (
     id INT PRIMARY KEY AUTO_INCREMENT,
     store_id INT DEFAULT 1,
     code VARCHAR(50) NOT NULL,
-    type ENUM('fixed', 'percentage') DEFAULT 'fixed',
-    value DECIMAL(10,2) NOT NULL,
+    type ENUM('fixed', 'percentage', 'free_shipping', 'gift_item', 'buy_x_get_y') DEFAULT 'fixed',
+    value DECIMAL(10,2) NOT NULL DEFAULT 0,
     minimum_amount DECIMAL(10,2) DEFAULT 0.00,
     maximum_discount DECIMAL(10,2) NULL,
+    gift_product_id INT NULL,
+    buy_quantity INT NULL,
+    get_quantity INT NULL,
     usage_limit INT NULL,
     used_count INT DEFAULT 0,
     starts_at TIMESTAMP NULL,
@@ -377,6 +382,7 @@ CREATE TABLE coupons (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE,
+    FOREIGN KEY (gift_product_id) REFERENCES products(id) ON DELETE SET NULL,
     UNIQUE KEY unique_code_store (code, store_id)
 );
 
@@ -474,3 +480,19 @@ INSERT INTO settings (store_id, setting_key, setting_value) VALUES
 (1, 'twitter_url', 'https://twitter.com/waslah'),
 (1, 'free_shipping_threshold', '100'),
 (1, 'default_shipping_cost', '10');
+
+-- ============================================
+-- MIGRATIONS FOR EXISTING DATABASES
+-- Run these if upgrading from an earlier version
+-- ============================================
+
+-- Add coupon columns to orders table (if not exists)
+-- ALTER TABLE orders ADD COLUMN coupon_id INT NULL AFTER subtotal;
+-- ALTER TABLE orders ADD COLUMN coupon_code VARCHAR(50) NULL AFTER coupon_id;
+
+-- Update coupons table for new discount types
+-- ALTER TABLE coupons MODIFY COLUMN type ENUM('fixed', 'percentage', 'free_shipping', 'gift_item', 'buy_x_get_y') DEFAULT 'fixed';
+-- ALTER TABLE coupons ADD COLUMN gift_product_id INT NULL AFTER maximum_discount;
+-- ALTER TABLE coupons ADD COLUMN buy_quantity INT NULL AFTER gift_product_id;
+-- ALTER TABLE coupons ADD COLUMN get_quantity INT NULL AFTER buy_quantity;
+-- ALTER TABLE coupons ADD FOREIGN KEY (gift_product_id) REFERENCES products(id) ON DELETE SET NULL;

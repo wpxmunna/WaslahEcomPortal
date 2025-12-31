@@ -47,6 +47,7 @@
             </div>
             <?php endif; ?>
 
+            <?php $isFullAdmin = ($user['role'] ?? '') === 'admin'; ?>
             <nav class="sidebar-nav">
                 <ul>
                     <li class="nav-item">
@@ -92,7 +93,14 @@
                             <span>Customers</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="<?= url('admin/coupons') ?>" class="nav-link <?= activeClass('admin/coupons') ?>">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span>Coupons</span>
+                        </a>
+                    </li>
 
+                    <?php if ($isFullAdmin): ?>
                     <li class="nav-header">Shipping & Payments</li>
                     <li class="nav-item">
                         <a href="<?= url('admin/pathao') ?>" class="nav-link <?= activeClass('admin/pathao') ?>">
@@ -123,6 +131,12 @@
 
                     <li class="nav-header">System</li>
                     <li class="nav-item">
+                        <a href="<?= url('admin/users') ?>" class="nav-link <?= activeClass('admin/users') ?>">
+                            <i class="fas fa-users-cog"></i>
+                            <span>Admin Users</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="<?= url('admin/reports') ?>" class="nav-link <?= activeClass('admin/reports') ?>">
                             <i class="fas fa-chart-bar"></i>
                             <span>Reports</span>
@@ -134,6 +148,7 @@
                             <span>Settings</span>
                         </a>
                     </li>
+                    <?php endif; ?>
                 </ul>
             </nav>
 

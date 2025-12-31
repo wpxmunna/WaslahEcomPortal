@@ -249,3 +249,23 @@ function logMessage(string $message, string $level = 'info'): void
     $logEntry = "[{$timestamp}] [{$level}] {$message}" . PHP_EOL;
     file_put_contents($logFile, $logEntry, FILE_APPEND);
 }
+
+/**
+ * Check if current user is full admin (not manager)
+ */
+function isFullAdmin(): bool
+{
+    $user = Session::getUser();
+    return ($user['role'] ?? '') === 'admin';
+}
+
+/**
+ * Require full admin access, redirect managers
+ */
+function requireFullAdmin(): void
+{
+    if (!isFullAdmin()) {
+        Session::setFlash('Access denied. Administrator privileges required.', 'error');
+        redirect('admin');
+    }
+}

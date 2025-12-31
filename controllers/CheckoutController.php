@@ -7,12 +7,14 @@ class CheckoutController extends Controller
 {
     private Cart $cartModel;
     private Order $orderModel;
+    private Coupon $couponModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->cartModel = new Cart();
         $this->orderModel = new Order();
+        $this->couponModel = new Coupon();
     }
 
     /**
@@ -69,11 +71,59 @@ class CheckoutController extends Controller
             return;
         }
 
+        // Handle coupon discount
+        $couponId = (int) $this->post('coupon_id', 0);
+        $discountAmount = (float) $this->post('discount_amount', 0);
+        $couponCode = '';
+        $couponType = null;
+        $giftProduct = null;
+        $isFreeShipping = false;
+
+        // Validate coupon again on server side
+        if ($couponId > 0) {
+            $coupon = $this->couponModel->find($couponId);
+            if ($coupon) {
+                $storeId = Session::get('current_store_id', 1);
+                $validation = $this->couponModel->validate($coupon['code'], $storeId, $cartData['subtotal']);
+                if ($validation['valid']) {
+                    $couponCode = $coupon['code'];
+                    $couponType = $coupon['type'];
+
+                    // Handle different coupon types
+                    switch ($coupon['type']) {
+                        case 'free_shipping':
+                            $isFreeShipping = true;
+                            $discountAmount = 0; // Shipping handled separately
+                            break;
+
+                        case 'gift_item':
+                            $giftProduct = $this->couponModel->getGiftProduct($couponId);
+                            $discountAmount = 0;
+                            break;
+
+                        default:
+                            $discountAmount = $this->couponModel->calculateDiscount($coupon, $cartData['subtotal']);
+                    }
+                } else {
+                    $couponId = 0;
+                    $discountAmount = 0;
+                }
+            } else {
+                $couponId = 0;
+                $discountAmount = 0;
+            }
+        }
+
         // Prepare order data
         $orderData = [
             'store_id' => Session::get('current_store_id', 1),
             'user_id' => Session::getUserId(),
             'payment_method' => $this->post('payment_method', 'cod'),
+
+            // Coupon
+            'coupon_id' => $couponId ?: null,
+            'coupon_code' => $couponCode,
+            'discount_amount' => $discountAmount,
 
             // Shipping address
             'shipping_name' => $this->post('shipping_name'),
@@ -99,8 +149,24 @@ class CheckoutController extends Controller
         ];
 
         try {
+            // If free shipping coupon, set shipping to 0 in cart data
+            if ($isFreeShipping) {
+                $cartData['shipping'] = 0;
+                $cartData['total'] = $cartData['subtotal'] + $cartData['tax']; // Recalculate without shipping
+            }
+
             // Create order
             $orderId = $this->orderModel->createFromCart($cartData, $orderData);
+
+            // Add gift item to order if applicable
+            if ($giftProduct && $orderId) {
+                $this->orderModel->addGiftItem($orderId, $giftProduct, $couponCode);
+            }
+
+            // Increment coupon usage if used
+            if ($couponId > 0) {
+                $this->couponModel->incrementUsage($couponId);
+            }
 
             // Get order details
             $order = $this->orderModel->find($orderId);
@@ -180,6 +246,77 @@ class CheckoutController extends Controller
         ];
 
         $this->view('checkout/track', $data);
+    }
+
+    /**
+     * Apply coupon (AJAX)
+     */
+    public function applyCoupon(): void
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['valid' => false, 'message' => 'Invalid request']);
+            return;
+        }
+
+        $code = trim($_POST['code'] ?? '');
+        $subtotal = (float) ($_POST['subtotal'] ?? 0);
+        $storeId = Session::get('current_store_id', 1);
+
+        if (empty($code)) {
+            echo json_encode(['valid' => false, 'message' => 'Please enter a coupon code']);
+            return;
+        }
+
+        $result = $this->couponModel->validate($code, $storeId, $subtotal);
+
+        if (!$result['valid']) {
+            echo json_encode($result);
+            return;
+        }
+
+        $coupon = $result['coupon'];
+        $discount = $this->couponModel->calculateDiscount($coupon, $subtotal);
+
+        // Build response based on coupon type
+        $response = [
+            'valid' => true,
+            'message' => $result['message'],
+            'coupon_id' => $coupon['id'],
+            'discount' => $discount,
+            'discount_type' => $coupon['type'],
+            'discount_value' => $coupon['value']
+        ];
+
+        // Add type-specific data
+        switch ($coupon['type']) {
+            case 'free_shipping':
+                $response['message'] = 'Free shipping applied!';
+                $response['is_free_shipping'] = true;
+                break;
+
+            case 'gift_item':
+                $giftProduct = $this->couponModel->getGiftProduct($coupon['id']);
+                $response['message'] = 'Gift item will be added to your order!';
+                $response['is_gift_item'] = true;
+                if ($giftProduct) {
+                    $response['gift_product'] = [
+                        'name' => $giftProduct['name'],
+                        'image' => $giftProduct['image'] ? upload($giftProduct['image']) : null,
+                        'price' => $giftProduct['price']
+                    ];
+                }
+                break;
+
+            case 'buy_x_get_y':
+                $response['message'] = "Buy {$coupon['buy_quantity']} Get {$coupon['get_quantity']} Free!";
+                $response['buy_quantity'] = $coupon['buy_quantity'];
+                $response['get_quantity'] = $coupon['get_quantity'];
+                break;
+        }
+
+        echo json_encode($response);
     }
 
     /**

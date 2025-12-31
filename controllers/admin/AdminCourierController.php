@@ -13,6 +13,8 @@ class AdminCourierController extends Controller
         if (!Auth::check() || !Auth::isAdmin()) {
             $this->redirect('admin/login');
         }
+
+        requireFullAdmin(); // Only full admins can manage couriers
     }
 
     public function index()

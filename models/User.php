@@ -85,4 +85,53 @@ class User extends Model
         );
         return $stats ?: ['total_orders' => 0, 'total_spent' => 0, 'avg_order_value' => 0];
     }
+
+    /**
+     * Get admin/manager users
+     */
+    public function getAdminUsers(int $page = 1, int $perPage = 20): array
+    {
+        return $this->paginate($page, $perPage, "role IN ('admin', 'manager')", [], 'created_at DESC');
+    }
+
+    /**
+     * Create admin user
+     */
+    public function createAdmin(array $data): int
+    {
+        $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $data['updated_at'] = date('Y-m-d H:i:s');
+        return $this->db->insert($this->table, $data);
+    }
+
+    /**
+     * Update admin user
+     */
+    public function updateAdmin(int $id, array $data): bool
+    {
+        if (!empty($data['password'])) {
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        } else {
+            unset($data['password']);
+        }
+        $data['updated_at'] = date('Y-m-d H:i:s');
+        return $this->db->update($this->table, $data, 'id = ?', [$id]);
+    }
+
+    /**
+     * Check if email exists (excluding a user)
+     */
+    public function emailExists(string $email, ?int $excludeId = null): bool
+    {
+        $sql = "SELECT id FROM {$this->table} WHERE email = ?";
+        $params = [$email];
+
+        if ($excludeId) {
+            $sql .= " AND id != ?";
+            $params[] = $excludeId;
+        }
+
+        return (bool) $this->db->fetch($sql, $params);
+    }
 }

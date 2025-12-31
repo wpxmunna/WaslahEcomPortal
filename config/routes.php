@@ -96,6 +96,15 @@ $router->add('admin/colors/update/{id}', 'AdminColorController', 'update');
 $router->add('admin/colors/delete/{id}', 'AdminColorController', 'delete');
 $router->add('admin/colors/reorder', 'AdminColorController', 'reorder');
 
+// Admin Coupons
+$router->add('admin/coupons', 'AdminCouponController', 'index');
+$router->add('admin/coupons/create', 'AdminCouponController', 'create');
+$router->add('admin/coupons/store', 'AdminCouponController', 'store');
+$router->add('admin/coupons/edit/{id}', 'AdminCouponController', 'edit');
+$router->add('admin/coupons/update/{id}', 'AdminCouponController', 'update');
+$router->add('admin/coupons/delete/{id}', 'AdminCouponController', 'delete');
+$router->add('admin/coupons/toggle/{id}', 'AdminCouponController', 'toggle');
+
 // Admin Couriers
 $router->add('admin/couriers', 'AdminCourierController', 'index');
 $router->add('admin/couriers/create', 'AdminCourierController', 'create');
@@ -125,6 +134,15 @@ $router->add('admin/pathao/cities', 'AdminPathaoController', 'cities');
 $router->add('admin/pathao/zones/{cityId}', 'AdminPathaoController', 'zones');
 $router->add('admin/pathao/areas/{zoneId}', 'AdminPathaoController', 'areas');
 
+// Admin Users (Admin/Manager Management)
+$router->add('admin/users', 'AdminUserController', 'index');
+$router->add('admin/users/create', 'AdminUserController', 'create');
+$router->add('admin/users/store', 'AdminUserController', 'store');
+$router->add('admin/users/edit/{id}', 'AdminUserController', 'edit');
+$router->add('admin/users/update/{id}', 'AdminUserController', 'update');
+$router->add('admin/users/delete/{id}', 'AdminUserController', 'delete');
+$router->add('admin/users/toggle/{id}', 'AdminUserController', 'toggle');
+
 // Admin Settings
 $router->add('admin/settings', 'AdminSettingsController', 'index');
 $router->add('admin/settings/update', 'AdminSettingsController', 'update');
@@ -136,3 +154,4 @@ $router->add('admin/settings/email/update', 'AdminSettingsController', 'updateEm
 // API endpoints for AJAX
 $router->add('api/cart/count', 'CartController', 'count');
 $router->add('api/products/filter', 'ProductController', 'filter');
+$router->add('api/coupon/apply', 'CheckoutController', 'applyCoupon');

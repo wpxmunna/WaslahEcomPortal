@@ -75,6 +75,17 @@
                                         <td colspan="3" class="text-end">Subtotal</td>
                                         <td class="text-end"><?= formatPrice($order['subtotal']) ?></td>
                                     </tr>
+                                    <?php if ($order['discount_amount'] > 0): ?>
+                                    <tr>
+                                        <td colspan="3" class="text-end">
+                                            Discount
+                                            <?php if (!empty($order['coupon_code'])): ?>
+                                            <span class="badge bg-success ms-1"><?= sanitize($order['coupon_code']) ?></span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-end text-success">-<?= formatPrice($order['discount_amount']) ?></td>
+                                    </tr>
+                                    <?php endif; ?>
                                     <tr>
                                         <td colspan="3" class="text-end">Shipping</td>
                                         <td class="text-end"><?= formatPrice($order['shipping_amount']) ?></td>

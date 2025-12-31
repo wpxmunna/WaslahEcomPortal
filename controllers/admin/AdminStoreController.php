@@ -11,6 +11,7 @@ class AdminStoreController extends Controller
     {
         parent::__construct();
         $this->requireAdmin();
+        requireFullAdmin(); // Only full admins can manage stores
         $this->storeModel = new Store();
     }
 

@@ -8,8 +8,8 @@ class Order extends Model
     protected string $table = 'orders';
     protected array $fillable = [
         'store_id', 'user_id', 'order_number', 'status', 'payment_status',
-        'payment_method', 'subtotal', 'discount_amount', 'tax_amount',
-        'shipping_amount', 'total_amount', 'shipping_name', 'shipping_phone',
+        'payment_method', 'subtotal', 'coupon_id', 'coupon_code', 'discount_amount',
+        'tax_amount', 'shipping_amount', 'total_amount', 'shipping_name', 'shipping_phone',
         'shipping_address_line1', 'shipping_address_line2', 'shipping_city',
         'shipping_state', 'shipping_postal_code', 'shipping_country',
         'billing_name', 'billing_phone', 'billing_address_line1',
@@ -30,7 +30,11 @@ class Order extends Model
             $orderData['subtotal'] = $cartData['subtotal'];
             $orderData['tax_amount'] = $cartData['tax'];
             $orderData['shipping_amount'] = $cartData['shipping'];
-            $orderData['total_amount'] = $cartData['total'];
+
+            // Calculate total with discount
+            $discount = $orderData['discount_amount'] ?? 0;
+            $orderData['total_amount'] = $cartData['total'] - $discount;
+
             $orderData['status'] = 'pending';
             $orderData['payment_status'] = 'pending';
             $orderData['created_at'] = date('Y-m-d H:i:s');
@@ -259,5 +263,24 @@ class Order extends Model
              LIMIT ?",
             [$storeId, $limit]
         );
+    }
+
+    /**
+     * Add gift item to order
+     */
+    public function addGiftItem(int $orderId, array $giftProduct, string $couponCode): bool
+    {
+        return $this->db->insert('order_items', [
+            'order_id' => $orderId,
+            'product_id' => $giftProduct['id'],
+            'variant_id' => null,
+            'product_name' => $giftProduct['name'] . ' (FREE Gift - ' . $couponCode . ')',
+            'product_sku' => $giftProduct['sku'] ?? '',
+            'variant_info' => 'Gift Item',
+            'quantity' => 1,
+            'unit_price' => 0,
+            'total_price' => 0,
+            'created_at' => date('Y-m-d H:i:s')
+        ]) > 0;
     }
 }

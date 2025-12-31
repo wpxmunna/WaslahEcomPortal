@@ -56,7 +56,12 @@
                         </tr>
                         <?php if ($order['discount_amount'] > 0): ?>
                         <tr>
-                            <td colspan="4" class="text-end">Discount</td>
+                            <td colspan="4" class="text-end">
+                                Discount
+                                <?php if (!empty($order['coupon_code'])): ?>
+                                <span class="badge bg-success ms-1"><?= sanitize($order['coupon_code']) ?></span>
+                                <?php endif; ?>
+                            </td>
                             <td class="text-end text-danger">-<?= formatPrice($order['discount_amount']) ?></td>
                         </tr>
                         <?php endif; ?>

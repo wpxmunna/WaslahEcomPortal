@@ -195,9 +195,30 @@
 
                         <hr>
 
+                        <!-- Coupon Code -->
+                        <div class="mb-3">
+                            <label class="form-label small">Have a coupon?</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="couponCode" name="coupon_code"
+                                       placeholder="Enter code" style="text-transform: uppercase;">
+                                <button type="button" class="btn btn-outline-primary" onclick="applyCoupon()">Apply</button>
+                            </div>
+                            <div id="couponMessage" class="small mt-1"></div>
+                            <input type="hidden" name="coupon_id" id="couponId" value="">
+                            <input type="hidden" name="discount_amount" id="discountAmount" value="0">
+                        </div>
+
                         <div class="summary-row">
                             <span>Subtotal</span>
                             <span><?= formatPrice($cart['subtotal']) ?></span>
+                        </div>
+
+                        <div class="summary-row" id="discountRow" style="display: none;">
+                            <span>Discount <span id="discountLabel"></span></span>
+                            <span class="text-success" id="discountValue">-<?= CURRENCY_SYMBOL ?>0</span>
+                            <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-2" onclick="removeCoupon()" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
 
                         <div class="summary-row">
@@ -265,4 +286,91 @@ document.querySelector('[name="card_expiry"]')?.addEventListener('input', functi
     }
     e.target.value = value;
 });
+
+// Coupon functions
+const cartSubtotal = <?= $cart['subtotal'] ?>;
+let appliedCouponType = null;
+
+function applyCoupon() {
+    const code = document.getElementById('couponCode').value.trim();
+    const msgDiv = document.getElementById('couponMessage');
+
+    if (!code) {
+        msgDiv.innerHTML = '<span class="text-danger">Please enter a coupon code</span>';
+        return;
+    }
+
+    msgDiv.innerHTML = '<span class="text-muted">Checking...</span>';
+
+    fetch(SITE_URL + '/api/coupon/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'code=' + encodeURIComponent(code) + '&subtotal=' + cartSubtotal
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.valid) {
+            appliedCouponType = data.discount_type;
+            document.getElementById('couponId').value = data.coupon_id;
+            document.getElementById('couponCode').disabled = true;
+
+            // Handle different coupon types
+            if (data.is_free_shipping) {
+                msgDiv.innerHTML = '<span class="text-success"><i class="fas fa-shipping-fast me-1"></i>' + data.message + '</span>';
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('discountLabel').textContent = '(' + code.toUpperCase() + ')';
+                document.getElementById('discountValue').innerHTML = '<span class="text-success"><i class="fas fa-shipping-fast"></i> Free Shipping</span>';
+                document.getElementById('shippingAmount').innerHTML = '<span class="text-success">FREE</span>';
+            } else if (data.is_gift_item) {
+                let giftHtml = '<span class="text-success"><i class="fas fa-gift me-1"></i>' + data.message + '</span>';
+                if (data.gift_product) {
+                    giftHtml += '<div class="d-flex align-items-center mt-2 p-2 bg-light rounded">';
+                    if (data.gift_product.image) {
+                        giftHtml += '<img src="' + data.gift_product.image + '" class="rounded" style="width:40px;height:40px;object-fit:cover;" alt="">';
+                    }
+                    giftHtml += '<div class="ms-2 small"><strong>' + data.gift_product.name + '</strong><br><span class="text-muted">FREE Gift!</span></div></div>';
+                }
+                msgDiv.innerHTML = giftHtml;
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('discountLabel').textContent = '(' + code.toUpperCase() + ')';
+                document.getElementById('discountValue').innerHTML = '<span class="text-success"><i class="fas fa-gift"></i> Gift Item</span>';
+            } else {
+                // Standard discount (fixed, percentage, buy_x_get_y)
+                msgDiv.innerHTML = '<span class="text-success"><i class="fas fa-check me-1"></i>' + data.message + '</span>';
+                document.getElementById('discountAmount').value = data.discount;
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('discountLabel').textContent = '(' + code.toUpperCase() + ')';
+                document.getElementById('discountValue').textContent = '-<?= CURRENCY_SYMBOL ?>' + data.discount.toFixed(2);
+                updateTotal(data.discount);
+            }
+        } else {
+            msgDiv.innerHTML = '<span class="text-danger"><i class="fas fa-times me-1"></i>' + data.message + '</span>';
+        }
+    })
+    .catch(err => {
+        msgDiv.innerHTML = '<span class="text-danger">Error applying coupon</span>';
+    });
+}
+
+function removeCoupon() {
+    document.getElementById('couponCode').value = '';
+    document.getElementById('couponCode').disabled = false;
+    document.getElementById('couponId').value = '';
+    document.getElementById('discountAmount').value = '0';
+    document.getElementById('discountRow').style.display = 'none';
+    document.getElementById('couponMessage').innerHTML = '';
+
+    // Reset shipping display if was free shipping
+    if (appliedCouponType === 'free_shipping') {
+        document.getElementById('shippingAmount').innerHTML = '<small>To be confirmed</small>';
+    }
+
+    appliedCouponType = null;
+    updateTotal(0);
+}
+
+function updateTotal(discount) {
+    const newTotal = cartSubtotal - discount;
+    document.getElementById('orderTotal').textContent = '<?= CURRENCY_SYMBOL ?>' + newTotal.toFixed(2);
+}
 </script>

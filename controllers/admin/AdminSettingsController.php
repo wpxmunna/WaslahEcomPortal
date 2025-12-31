@@ -13,6 +13,8 @@ class AdminSettingsController extends Controller
         if (!Auth::check() || !Auth::isAdmin()) {
             $this->redirect('admin/login');
         }
+
+        requireFullAdmin(); // Only full admins can access settings
     }
 
     public function index()

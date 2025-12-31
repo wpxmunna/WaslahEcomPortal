@@ -106,7 +106,8 @@ class Session
     {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user'] = $user;
-        $_SESSION['is_admin'] = ($user['role'] ?? 'customer') === 'admin';
+        // Allow both 'admin' and 'manager' roles to access admin panel
+        $_SESSION['is_admin'] = in_array($user['role'] ?? 'customer', ['admin', 'manager']);
     }
 
     /**

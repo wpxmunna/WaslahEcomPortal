@@ -274,6 +274,17 @@ class Product extends Model
     }
 
     /**
+     * Get all products for a store (simple list for dropdowns)
+     */
+    public function getByStore(int $storeId): array
+    {
+        return $this->db->fetchAll(
+            "SELECT id, name, price, sku FROM products WHERE store_id = ? AND status = 'active' ORDER BY name ASC",
+            [$storeId]
+        );
+    }
+
+    /**
      * Get all products for admin
      */
     public function getAllAdmin(int $page = 1, int $perPage = 20, int $storeId = 1): array

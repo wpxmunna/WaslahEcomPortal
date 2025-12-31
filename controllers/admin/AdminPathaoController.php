@@ -12,6 +12,8 @@ class AdminPathaoController extends Controller
         if (!Auth::check() || !Auth::isAdmin()) {
             $this->redirect('admin/login');
         }
+
+        requireFullAdmin(); // Only full admins can manage Pathao settings
     }
 
     public function index()
