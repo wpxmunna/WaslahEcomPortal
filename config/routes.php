@@ -134,6 +134,15 @@ $router->add('admin/pathao/cities', 'AdminPathaoController', 'cities');
 $router->add('admin/pathao/zones/{cityId}', 'AdminPathaoController', 'zones');
 $router->add('admin/pathao/areas/{zoneId}', 'AdminPathaoController', 'areas');
 
+// Admin Returns
+$router->add('admin/returns', 'AdminReturnController', 'index');
+$router->add('admin/returns/create', 'AdminReturnController', 'create');
+$router->add('admin/returns/store', 'AdminReturnController', 'store');
+$router->add('admin/returns/show/{id}', 'AdminReturnController', 'show');
+$router->add('admin/returns/updateRefund/{id}', 'AdminReturnController', 'updateRefund');
+$router->add('admin/returns/saveNotes/{id}', 'AdminReturnController', 'saveNotes');
+$router->add('admin/returns/delete/{id}', 'AdminReturnController', 'delete');
+
 // Admin Users (Admin/Manager Management)
 $router->add('admin/users', 'AdminUserController', 'index');
 $router->add('admin/users/create', 'AdminUserController', 'create');

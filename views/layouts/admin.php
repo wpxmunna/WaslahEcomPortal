@@ -99,6 +99,12 @@
                             <span>Coupons</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="<?= url('admin/returns') ?>" class="nav-link <?= activeClass('admin/returns') ?>">
+                            <i class="fas fa-undo"></i>
+                            <span>Returns</span>
+                        </a>
+                    </li>
 
                     <?php if ($isFullAdmin): ?>
                     <li class="nav-header">Shipping & Payments</li>
