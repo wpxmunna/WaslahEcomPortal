@@ -108,6 +108,10 @@ class Session
         $_SESSION['user'] = $user;
         // Allow both 'admin' and 'manager' roles to access admin panel
         $_SESSION['is_admin'] = in_array($user['role'] ?? 'customer', ['admin', 'manager']);
+        // Set admin role for permission checks
+        $_SESSION['admin_role'] = $user['role'] ?? 'customer';
+        // Set admin store_id (default to 1)
+        $_SESSION['admin_store_id'] = $user['store_id'] ?? 1;
     }
 
     /**

@@ -71,6 +71,42 @@ class CheckoutController extends Controller
             return;
         }
 
+        // Validate stock for all items before checkout
+        $productModel = new Product();
+        $outOfStockItems = [];
+
+        foreach ($cartData['items'] as $item) {
+            $product = $productModel->find($item['product_id']);
+
+            if (!$product || $product['status'] !== 'active') {
+                $outOfStockItems[] = $item['product_name'] . ' (no longer available)';
+                continue;
+            }
+
+            // Check variant stock if applicable
+            if (!empty($item['variant_id'])) {
+                $variant = $this->db->fetch(
+                    "SELECT stock_quantity FROM product_variants WHERE id = ?",
+                    [$item['variant_id']]
+                );
+                $availableStock = $variant['stock_quantity'] ?? 0;
+            } else {
+                $availableStock = $product['stock_quantity'];
+            }
+
+            if ($availableStock <= 0) {
+                $outOfStockItems[] = $item['product_name'] . ' (out of stock)';
+            } elseif ($item['quantity'] > $availableStock) {
+                $outOfStockItems[] = $item['product_name'] . ' (only ' . $availableStock . ' available)';
+            }
+        }
+
+        if (!empty($outOfStockItems)) {
+            $message = 'Cannot complete checkout. The following items have stock issues: ' . implode(', ', $outOfStockItems);
+            $this->redirect('cart', $message, 'error');
+            return;
+        }
+
         // Handle coupon discount
         $couponId = (int) $this->post('coupon_id', 0);
         $discountAmount = (float) $this->post('discount_amount', 0);

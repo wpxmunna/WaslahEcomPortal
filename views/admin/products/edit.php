@@ -23,7 +23,7 @@ foreach ($variants ?? [] as $variant) {
 }
 ?>
 
-<form action="<?= url('admin/products/update/' . $product['id']) ?>" method="POST" enctype="multipart/form-data">
+<form id="productEditForm" action="<?= url('admin/products/update/' . $product['id']) ?>" method="POST" enctype="multipart/form-data">
     <?= csrfField() ?>
 
     <div class="row">
@@ -152,28 +152,6 @@ foreach ($variants ?? [] as $variant) {
                     </div>
                 </div>
             </div>
-
-            <!-- Existing Images -->
-            <?php if (!empty($images)): ?>
-            <div class="card mb-4">
-                <div class="card-header">Current Images</div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <?php foreach ($images as $image): ?>
-                        <div class="col-md-3">
-                            <div class="border rounded p-2 text-center">
-                                <img src="<?= upload($image['image_path']) ?>" class="img-fluid mb-2"
-                                     style="max-height: 150px;">
-                                <?php if ($image['is_primary']): ?>
-                                <span class="badge bg-primary">Primary</span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
-            <?php endif; ?>
         </div>
 
         <div class="col-lg-4">
@@ -224,14 +202,6 @@ foreach ($variants ?? [] as $variant) {
                 </div>
             </div>
 
-            <!-- New Image -->
-            <div class="card mb-4">
-                <div class="card-header">Add New Image</div>
-                <div class="card-body">
-                    <input type="file" class="form-control" name="image" accept="image/*">
-                    <small class="text-muted">This will become the primary image</small>
-                </div>
-            </div>
 
             <!-- SEO -->
             <div class="card mb-4">
@@ -273,6 +243,70 @@ foreach ($variants ?? [] as $variant) {
         </div>
     </div>
 </form>
+
+<!-- Product Images - Separate Section (Outside Main Form) -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-images me-2"></i> Product Images</span>
+                <span class="badge bg-secondary"><?= count($images ?? []) ?> images</span>
+            </div>
+            <div class="card-body">
+                <!-- Current Images -->
+                <div class="row g-3 mb-3">
+                    <?php if (!empty($images)): ?>
+                        <?php foreach ($images as $image): ?>
+                        <div class="col-md-2 col-4">
+                            <div class="border rounded p-2 text-center">
+                                <img src="<?= upload($image['image_path']) ?>" class="img-fluid mb-2" style="max-height: 100px;">
+                                <div>
+                                    <?php if ($image['is_primary']): ?>
+                                        <span class="badge bg-primary">Primary</span>
+                                    <?php else: ?>
+                                        <a href="<?= url('admin/products/set-primary/' . $product['id'] . '/' . $image['id']) ?>"
+                                           class="btn btn-sm btn-outline-primary" title="Set Primary">
+                                            <i class="fas fa-star"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    <a href="<?= url('admin/products/delete-image/' . $image['id']) ?>"
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Delete this image?')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="col-12 text-muted text-center py-3">
+                            <i class="fas fa-images fa-2x mb-2 d-block"></i>
+                            No images yet
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Upload Form -->
+                <div class="border-top pt-3">
+                    <form action="<?= url('admin/products/upload-images/' . $product['id']) ?>" method="POST" enctype="multipart/form-data">
+                        <?= csrfField() ?>
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <label class="form-label">Add New Images</label>
+                                <input type="file" class="form-control" name="images[]" accept="image/*" multiple required>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-upload me-1"></i> Upload Images
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
 .color-swatch {
@@ -327,6 +361,41 @@ foreach ($variants ?? [] as $variant) {
     border: 1px solid #ced4da;
     border-radius: 4px;
     padding: 5px;
+}
+/* Product Image Card */
+.product-image-card {
+    transition: all 0.2s ease;
+}
+.product-image-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.product-image-card .image-actions {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin-top: 5px;
+}
+.image-preview-item {
+    position: relative;
+}
+.image-preview-item img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+.image-preview-item .remove-preview {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: white;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
 }
 .remove-color-btn {
     margin-left: auto;

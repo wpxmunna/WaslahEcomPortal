@@ -20,24 +20,57 @@
             <!-- Product Gallery -->
             <div class="col-lg-6 mb-4">
                 <div class="product-gallery">
-                    <div class="main-image">
+                    <div class="main-image" id="mainImageContainer">
                         <?php $primaryImage = $product['images'][0]['image_path'] ?? null; ?>
                         <?php if ($primaryImage): ?>
                         <img src="<?= upload($primaryImage) ?>" alt="<?= sanitize($product['name']) ?>" id="mainProductImage">
+                        <div class="zoom-icon" id="zoomIconBtn" title="Click to enlarge">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                        <div id="zoomLens"></div>
                         <?php else: ?>
                         <div class="img-placeholder" style="height: 500px;"><i class="fas fa-image"></i></div>
                         <?php endif; ?>
                     </div>
-                    <?php if (count($product['images']) > 1): ?>
-                    <div class="thumbnail-images">
+                    <?php if (count($product['images']) > 0): ?>
+                    <div class="thumbnail-images" id="thumbnailContainer">
                         <?php foreach ($product['images'] as $index => $image): ?>
                         <img src="<?= upload($image['image_path']) ?>"
                              alt="<?= $image['alt_text'] ?? $product['name'] ?>"
-                             class="<?= $index === 0 ? 'active' : '' ?>"
-                             data-large="<?= upload($image['image_path']) ?>">
+                             class="thumb-img <?= $index === 0 ? 'active' : '' ?>"
+                             data-large="<?= upload($image['image_path']) ?>"
+                             data-index="<?= $index ?>">
                         <?php endforeach; ?>
                     </div>
                     <?php endif; ?>
+                </div>
+
+                <!-- Zoom Result (positioned fixed, outside container) -->
+                <div id="zoomResult"></div>
+            </div>
+
+            <!-- Lightbox Gallery -->
+            <div class="lightbox-overlay" id="lightboxOverlay">
+                <div class="lightbox-content" id="lightboxContent">
+                    <button class="lightbox-close" id="lightboxClose">&times;</button>
+                    <button class="lightbox-nav lightbox-prev" id="lightboxPrev">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <img src="" alt="" class="lightbox-image" id="lightboxImage">
+                    <button class="lightbox-nav lightbox-next" id="lightboxNext">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="lightbox-thumbnails" id="lightboxThumbnails">
+                        <?php foreach ($product['images'] as $index => $image): ?>
+                        <img src="<?= upload($image['image_path']) ?>"
+                             alt="<?= $image['alt_text'] ?? $product['name'] ?>"
+                             class="lb-thumb <?= $index === 0 ? 'active' : '' ?>"
+                             data-index="<?= $index ?>">
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="lightbox-counter">
+                        <span id="currentSlide">1</span> / <span id="totalSlides"><?= count($product['images']) ?></span>
+                    </div>
                 </div>
             </div>
 
@@ -99,15 +132,24 @@
 
                         <!-- Color Selector -->
                         <?php
-                        $colors = array_filter($product['variants'], fn($v) => !empty($v['color']));
-                        if (!empty($colors)):
+                        // Get unique colors from variants
+                        $uniqueColors = [];
+                        foreach ($product['variants'] as $variant) {
+                            if (!empty($variant['color']) && !isset($uniqueColors[$variant['color']])) {
+                                $uniqueColors[$variant['color']] = $variant;
+                            }
+                        }
+                        if (!empty($uniqueColors)):
                         ?>
                         <div class="variant-selector">
                             <label>Color</label>
                             <div class="color-options">
-                                <?php foreach ($colors as $variant): ?>
+                                <?php foreach ($uniqueColors as $colorName => $variant):
+                                    $colorCode = $variant['color_code'] ?? $variant['color'];
+                                    $isWhite = strtolower($colorCode) === '#ffffff' || strtolower($colorCode) === 'white' || strtolower($colorCode) === '#fff';
+                                ?>
                                 <span class="color-option"
-                                      style="background: <?= $variant['color_code'] ?? $variant['color'] ?>"
+                                      style="background: <?= $colorCode ?>; <?= $isWhite ? 'border: 2px solid #ccc;' : '' ?>"
                                       data-color="<?= $variant['color'] ?>"
                                       data-variant="<?= $variant['id'] ?>"
                                       title="<?= $variant['color'] ?>"></span>
@@ -125,12 +167,21 @@
                         </div>
 
                         <!-- Actions -->
+                        <?php if ($product['stock_quantity'] > 0): ?>
                         <button type="button" class="btn btn-primary add-to-cart-btn" onclick="addProductToCart()">
                             <i class="fas fa-shopping-cart me-2"></i> Add to Cart
                         </button>
                         <a href="<?= url('checkout') ?>" class="btn btn-outline-dark buy-now-btn" onclick="addProductToCart(); return true;">
                             <i class="fas fa-bolt me-2"></i> Buy Now
                         </a>
+                        <?php else: ?>
+                        <button type="button" class="btn btn-secondary add-to-cart-btn" disabled>
+                            <i class="fas fa-times-circle me-2"></i> Out of Stock
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary buy-now-btn" disabled>
+                            <i class="fas fa-bell me-2"></i> Notify When Available
+                        </button>
+                        <?php endif; ?>
                     </form>
 
                     <!-- Additional Info -->
@@ -204,21 +255,40 @@
     </div>
 </section>
 
-<script>
+<script type="text/javascript">
+// Product images array - built from data attributes
+var productImages = [];
+var currentImageIndex = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Build images array from thumbnail data
+    var thumbs = document.querySelectorAll('#thumbnailContainer .thumb-img');
+    thumbs.forEach(function(thumb) {
+        productImages.push(thumb.dataset.large);
+    });
+
+    // If no thumbnails, try main image
+    if (productImages.length === 0) {
+        var mainImg = document.getElementById('mainProductImage');
+        if (mainImg) {
+            productImages.push(mainImg.src);
+        }
+    }
+});
+
 function addProductToCart() {
-    const form = document.getElementById('addToCartForm');
-    const formData = new FormData(form);
+    var form = document.getElementById('addToCartForm');
+    var formData = new FormData(form);
 
     fetch(SITE_URL + '/cart/add', {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
         if (data.success) {
             showNotification('Product added to cart!', 'success');
-            // Update cart count
-            document.querySelectorAll('.cart-count').forEach(el => {
+            document.querySelectorAll('.cart-count').forEach(function(el) {
                 el.textContent = data.cartCount;
                 el.style.display = 'flex';
             });
@@ -231,7 +301,7 @@ function addProductToCart() {
 function shareProduct() {
     if (navigator.share) {
         navigator.share({
-            title: '<?= sanitize($product['name']) ?>',
+            title: document.title,
             url: window.location.href
         });
     } else {
@@ -239,4 +309,255 @@ function shareProduct() {
         showNotification('Link copied to clipboard!', 'success');
     }
 }
+
+// Change main image when clicking thumbnail
+function changeMainImage(thumb, index) {
+    var mainImage = document.getElementById('mainProductImage');
+    var largeSrc = thumb.dataset.large;
+
+    mainImage.src = largeSrc;
+    currentImageIndex = index;
+
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail-images img').forEach(function(img) {
+        img.classList.remove('active');
+    });
+    thumb.classList.add('active');
+
+    // Re-init zoom for new image
+    initZoom();
+}
+
+// Zoom functionality - Modern with animations
+function initZoom() {
+    var container = document.getElementById('mainImageContainer');
+    var img = document.getElementById('mainProductImage');
+    var lens = document.getElementById('zoomLens');
+    var result = document.getElementById('zoomResult');
+
+    if (!img || !lens || !result || !container) {
+        console.log('Zoom elements not found');
+        return;
+    }
+
+    // Zoom multiplier (higher = more zoom)
+    var zoomLevel = 2.8;
+
+    function updateZoom() {
+        result.style.backgroundImage = "url('" + img.src + "')";
+        result.style.backgroundSize = (img.offsetWidth * zoomLevel) + "px " + (img.offsetHeight * zoomLevel) + "px";
+    }
+
+    function showZoom() {
+        updateZoom();
+        lens.style.display = 'block';
+        result.style.display = 'block';
+        // Trigger reflow for animation
+        lens.offsetHeight;
+        result.offsetHeight;
+        lens.classList.add('active');
+        result.classList.add('active');
+    }
+
+    function hideZoom() {
+        lens.classList.remove('active');
+        result.classList.remove('active');
+        // Hide after animation
+        setTimeout(function() {
+            if (!lens.classList.contains('active')) {
+                lens.style.display = 'none';
+                result.style.display = 'none';
+            }
+        }, 250);
+    }
+
+    function moveZoom(e) {
+        var rect = img.getBoundingClientRect();
+
+        // Mouse position relative to image
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+
+        // Keep within bounds
+        x = Math.max(0, Math.min(x, rect.width));
+        y = Math.max(0, Math.min(y, rect.height));
+
+        // Position lens centered on cursor
+        var lensX = x - (lens.offsetWidth / 2);
+        var lensY = y - (lens.offsetHeight / 2);
+        lens.style.left = lensX + 'px';
+        lens.style.top = lensY + 'px';
+
+        // Calculate background position for zoom result
+        var bgX = x * zoomLevel - (result.offsetWidth / 2);
+        var bgY = y * zoomLevel - (result.offsetHeight / 2);
+        result.style.backgroundPosition = "-" + bgX + "px -" + bgY + "px";
+    }
+
+    // Remove previous listeners to avoid duplicates
+    container.onmouseenter = showZoom;
+    container.onmouseleave = hideZoom;
+    container.onmousemove = moveZoom;
+
+    console.log('Zoom initialized successfully');
+}
+
+// Lightbox functionality
+function openLightbox(index = 0) {
+    currentImageIndex = index;
+    const overlay = document.getElementById('lightboxOverlay');
+    const image = document.getElementById('lightboxImage');
+
+    image.src = productImages[currentImageIndex];
+    updateLightboxCounter();
+    updateLightboxThumbnails();
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    const overlay = document.getElementById('lightboxOverlay');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function navigateLightbox(direction) {
+    currentImageIndex += direction;
+
+    if (currentImageIndex >= productImages.length) {
+        currentImageIndex = 0;
+    } else if (currentImageIndex < 0) {
+        currentImageIndex = productImages.length - 1;
+    }
+
+    document.getElementById('lightboxImage').src = productImages[currentImageIndex];
+    updateLightboxCounter();
+    updateLightboxThumbnails();
+}
+
+function goToSlide(index) {
+    currentImageIndex = index;
+    document.getElementById('lightboxImage').src = productImages[currentImageIndex];
+    updateLightboxCounter();
+    updateLightboxThumbnails();
+}
+
+function updateLightboxCounter() {
+    document.getElementById('currentSlide').textContent = currentImageIndex + 1;
+}
+
+function updateLightboxThumbnails() {
+    const thumbs = document.querySelectorAll('#lightboxThumbnails .lb-thumb');
+    thumbs.forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === currentImageIndex);
+    });
+}
+
+// Keyboard navigation for lightbox
+document.addEventListener('keydown', function(e) {
+    const overlay = document.getElementById('lightboxOverlay');
+    if (!overlay.classList.contains('active')) return;
+
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navigateLightbox(-1);
+    if (e.key === 'ArrowRight') navigateLightbox(1);
+});
+
+// Initialize zoom and lightbox on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const mainImg = document.getElementById('mainProductImage');
+    const zoomIcon = document.getElementById('zoomIconBtn');
+    const thumbnailContainer = document.getElementById('thumbnailContainer');
+
+    // Lightbox elements
+    const lightboxOverlay = document.getElementById('lightboxOverlay');
+    const lightboxContent = document.getElementById('lightboxContent');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const lightboxPrev = document.getElementById('lightboxPrev');
+    const lightboxNext = document.getElementById('lightboxNext');
+    const lightboxThumbnails = document.getElementById('lightboxThumbnails');
+
+    // Set up main image click handler
+    if (mainImg) {
+        mainImg.style.cursor = 'pointer';
+        mainImg.addEventListener('click', function() {
+            openLightbox(currentImageIndex);
+        });
+    }
+
+    if (zoomIcon) {
+        zoomIcon.addEventListener('click', function() {
+            openLightbox(currentImageIndex);
+        });
+    }
+
+    // Set up thumbnail click handlers using event delegation
+    if (thumbnailContainer) {
+        thumbnailContainer.addEventListener('click', function(e) {
+            const thumb = e.target.closest('.thumb-img');
+            if (thumb) {
+                const index = parseInt(thumb.dataset.index, 10);
+                changeMainImage(thumb, index);
+            }
+        });
+    }
+
+    // Lightbox event handlers
+    if (lightboxOverlay) {
+        lightboxOverlay.addEventListener('click', function(e) {
+            if (e.target === lightboxOverlay) {
+                closeLightbox();
+            }
+        });
+    }
+
+    if (lightboxContent) {
+        lightboxContent.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+
+    if (lightboxClose) {
+        lightboxClose.addEventListener('click', closeLightbox);
+    }
+
+    if (lightboxPrev) {
+        lightboxPrev.addEventListener('click', function() {
+            navigateLightbox(-1);
+        });
+    }
+
+    if (lightboxNext) {
+        lightboxNext.addEventListener('click', function() {
+            navigateLightbox(1);
+        });
+    }
+
+    if (lightboxThumbnails) {
+        lightboxThumbnails.addEventListener('click', function(e) {
+            const thumb = e.target.closest('.lb-thumb');
+            if (thumb) {
+                const index = parseInt(thumb.dataset.index, 10);
+                goToSlide(index);
+            }
+        });
+    }
+
+    // Initialize zoom
+    if (mainImg) {
+        if (mainImg.complete && mainImg.naturalHeight !== 0) {
+            setTimeout(initZoom, 100);
+        } else {
+            mainImg.addEventListener('load', function() {
+                setTimeout(initZoom, 100);
+            });
+        }
+    }
+});
+
+// Fallback: also try on window load
+window.addEventListener('load', function() {
+    setTimeout(initZoom, 200);
+});
 </script>

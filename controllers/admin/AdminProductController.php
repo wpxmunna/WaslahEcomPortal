@@ -57,13 +57,27 @@ class AdminProductController extends Controller
      */
     public function store(): void
     {
+        // Ensure this is a POST request
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/products/create');
+            return;
+        }
+
+        // Validate required fields
+        $name = $this->post('name');
+        if (empty($name)) {
+            Session::setFlash('Product name is required', 'error');
+            $this->redirect('admin/products/create');
+            return;
+        }
+
         $storeId = Session::get('admin_store_id', 1);
 
         $data = [
             'store_id' => $storeId,
             'category_id' => $this->post('category_id') ?: null,
-            'name' => $this->post('name'),
-            'slug' => $this->post('slug') ?: slugify($this->post('name')),
+            'name' => $name,
+            'slug' => $this->post('slug') ?: slugify($name),
             'description' => $this->post('description'),
             'short_description' => $this->post('short_description'),
             'price' => (float) $this->post('price'),
@@ -151,12 +165,26 @@ class AdminProductController extends Controller
      */
     public function update(int $id): void
     {
+        // Ensure this is a POST request
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/products/edit/' . $id);
+            return;
+        }
+
+        // Validate required fields
+        $name = $this->post('name');
+        if (empty($name)) {
+            Session::setFlash('Product name is required', 'error');
+            $this->redirect('admin/products/edit/' . $id);
+            return;
+        }
+
         $storeId = Session::get('admin_store_id', 1);
 
         $data = [
             'category_id' => $this->post('category_id') ?: null,
-            'name' => $this->post('name'),
-            'slug' => $this->post('slug') ?: slugify($this->post('name')),
+            'name' => $name,
+            'slug' => $this->post('slug') ?: slugify($name),
             'description' => $this->post('description'),
             'short_description' => $this->post('short_description'),
             'price' => (float) $this->post('price'),
@@ -172,14 +200,6 @@ class AdminProductController extends Controller
         ];
 
         $this->productModel->update($id, $data);
-
-        // Handle new image upload
-        if (!empty($_FILES['image']['name'])) {
-            $imagePath = $this->uploadFile($_FILES['image'], 'products');
-            if ($imagePath) {
-                $this->productModel->addImage($id, $imagePath, true);
-            }
-        }
 
         // Handle variants update
         $variants = $this->post('variants', []);
@@ -250,5 +270,127 @@ class AdminProductController extends Controller
             "SELECT * FROM product_colors WHERE store_id = ? AND status = 1 ORDER BY sort_order, name",
             [$storeId]
         );
+    }
+
+    /**
+     * Upload images (separate form)
+     */
+    public function uploadImages(int $productId): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/products/edit/' . $productId);
+            return;
+        }
+
+        if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
+            Session::setFlash('Invalid request', 'error');
+            $this->redirect('admin/products/edit/' . $productId);
+            return;
+        }
+
+        $uploaded = 0;
+        $errors = [];
+
+        if (!empty($_FILES['images']['name'][0])) {
+            $hasExistingPrimary = $this->productModel->hasPrimaryImage($productId);
+            $isFirst = true;
+
+            foreach ($_FILES['images']['name'] as $key => $name) {
+                if (empty($name)) continue;
+
+                $error = $_FILES['images']['error'][$key];
+                $size = $_FILES['images']['size'][$key];
+                $type = $_FILES['images']['type'][$key];
+
+                // Check for upload errors
+                if ($error !== UPLOAD_ERR_OK) {
+                    $errors[] = "$name: Upload error code $error";
+                    continue;
+                }
+
+                // Check size
+                if ($size > MAX_IMAGE_SIZE) {
+                    $errors[] = "$name: File too large (" . round($size/1024/1024, 1) . "MB, max " . (MAX_IMAGE_SIZE/1024/1024) . "MB)";
+                    continue;
+                }
+
+                // Check type
+                if (!in_array($type, ALLOWED_IMAGE_TYPES)) {
+                    $errors[] = "$name: Invalid type ($type)";
+                    continue;
+                }
+
+                $file = [
+                    'name' => $name,
+                    'type' => $type,
+                    'tmp_name' => $_FILES['images']['tmp_name'][$key],
+                    'error' => $error,
+                    'size' => $size
+                ];
+
+                $imagePath = $this->uploadFile($file, 'products');
+                if ($imagePath) {
+                    $isPrimary = (!$hasExistingPrimary && $isFirst);
+                    $this->productModel->addImage($productId, $imagePath, $isPrimary);
+                    $uploaded++;
+                    $isFirst = false;
+                } else {
+                    $errors[] = "$name: Failed to save file";
+                }
+            }
+        } else {
+            $errors[] = "No files received";
+        }
+
+        if ($uploaded > 0) {
+            Session::setFlash("$uploaded image(s) uploaded successfully", 'success');
+        } else {
+            $errorMsg = !empty($errors) ? implode(', ', $errors) : 'Unknown error';
+            Session::setFlash("Upload failed: $errorMsg", 'error');
+        }
+
+        $this->redirect('admin/products/edit/' . $productId);
+    }
+
+    /**
+     * Delete product image
+     */
+    public function deleteImage(int $imageId): void
+    {
+        $image = $this->db->fetch("SELECT * FROM product_images WHERE id = ?", [$imageId]);
+
+        if ($image) {
+            $productId = $image['product_id'];
+
+            // Delete from database
+            $this->db->delete('product_images', 'id = ?', [$imageId]);
+
+            // Delete file
+            $filePath = ROOT_PATH . '/uploads/' . $image['image_path'];
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+
+            Session::setFlash('Image deleted', 'success');
+            $this->redirect('admin/products/edit/' . $productId);
+        } else {
+            Session::setFlash('Image not found', 'error');
+            $this->redirect('admin/products');
+        }
+    }
+
+    /**
+     * Set primary image
+     */
+    public function setPrimary(int $productId, int $imageId): void
+    {
+        // Remove primary from all
+        $this->db->query("UPDATE product_images SET is_primary = 0 WHERE product_id = ?", [$productId]);
+
+        // Set new primary
+        $this->db->query("UPDATE product_images SET is_primary = 1 WHERE id = ?", [$imageId]);
+
+        Session::setFlash('Primary image updated', 'success');
+        $this->redirect('admin/products/edit/' . $productId);
     }
 }

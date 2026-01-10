@@ -30,7 +30,7 @@ define('SESSION_LIFETIME', 7200); // 2 hours
 define('HASH_COST', 12);
 
 // Image Settings
-define('MAX_IMAGE_SIZE', 5 * 1024 * 1024); // 5MB
+define('MAX_IMAGE_SIZE', 20 * 1024 * 1024); // 20MB
 define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png', 'image/webp']);
 define('THUMB_WIDTH', 300);
 define('THUMB_HEIGHT', 400);

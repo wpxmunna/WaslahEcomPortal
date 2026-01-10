@@ -232,6 +232,18 @@ class Product extends Model
     }
 
     /**
+     * Check if product has a primary image
+     */
+    public function hasPrimaryImage(int $productId): bool
+    {
+        $result = $this->db->fetch(
+            "SELECT id FROM product_images WHERE product_id = ? AND is_primary = 1 LIMIT 1",
+            [$productId]
+        );
+        return !empty($result);
+    }
+
+    /**
      * Add product variant
      */
     public function addVariant(int $productId, array $data): int
@@ -312,5 +324,20 @@ class Product extends Model
             'total' => $total,
             'total_pages' => $totalPages
         ];
+    }
+
+    /**
+     * Get active products for dropdowns/selection
+     */
+    public function getActiveProducts(int $storeId): array
+    {
+        return $this->db->fetchAll(
+            "SELECT p.id, p.name, p.sku, p.price, p.cost_price, p.stock_quantity,
+                    (SELECT image_path FROM product_images WHERE product_id = p.id AND is_primary = 1 LIMIT 1) as image
+             FROM products p
+             WHERE p.store_id = ? AND p.status = 'active'
+             ORDER BY p.name ASC",
+            [$storeId]
+        );
     }
 }

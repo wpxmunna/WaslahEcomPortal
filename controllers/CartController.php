@@ -71,8 +71,14 @@ class CartController extends Controller
             ? ($variant['stock_quantity'] ?? 0)
             : $product['stock_quantity'];
 
+        // Check if product is out of stock
+        if ($availableStock <= 0) {
+            $this->json(['success' => false, 'message' => 'This product is currently out of stock']);
+            return;
+        }
+
         if ($quantity > $availableStock) {
-            $this->json(['success' => false, 'message' => 'Not enough stock available']);
+            $this->json(['success' => false, 'message' => 'Not enough stock available. Only ' . $availableStock . ' items left.']);
             return;
         }
 

@@ -1,4 +1,5 @@
-<div class="product-card">
+<?php $isOutOfStock = ($product['stock_quantity'] ?? 0) <= 0; ?>
+<div class="product-card <?= $isOutOfStock ? 'out-of-stock' : '' ?>">
     <div class="product-image">
         <a href="<?= url('product/' . $product['slug']) ?>">
             <?php if ($product['image']): ?>
@@ -8,11 +9,19 @@
             <?php endif; ?>
         </a>
 
+        <?php if ($isOutOfStock): ?>
+        <div class="out-of-stock-overlay">
+            <span>Out of Stock</span>
+        </div>
+        <?php endif; ?>
+
         <div class="product-badges">
-            <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
+            <?php if ($isOutOfStock): ?>
+            <span class="badge-sold-out">Sold Out</span>
+            <?php elseif ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
             <span class="badge-sale">-<?= discountPercent($product['price'], $product['sale_price']) ?>%</span>
             <?php endif; ?>
-            <?php if ($product['is_new']): ?>
+            <?php if ($product['is_new'] && !$isOutOfStock): ?>
             <span class="badge-new">New</span>
             <?php endif; ?>
         </div>
@@ -24,9 +33,15 @@
             <a href="<?= url('product/' . $product['slug']) ?>" title="Quick View">
                 <i class="fas fa-eye"></i>
             </a>
+            <?php if (!$isOutOfStock): ?>
             <button onclick="addToCart(<?= $product['id'] ?>)" title="Add to Cart">
                 <i class="fas fa-shopping-cart"></i>
             </button>
+            <?php else: ?>
+            <button disabled title="Out of Stock" style="opacity: 0.5; cursor: not-allowed;">
+                <i class="fas fa-shopping-cart"></i>
+            </button>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -43,5 +58,10 @@
             <span class="current-price"><?= formatPrice($product['price']) ?></span>
             <?php endif; ?>
         </div>
+        <?php if ($isOutOfStock): ?>
+        <div class="stock-status out-of-stock">
+            <i class="fas fa-times-circle"></i> Out of Stock
+        </div>
+        <?php endif; ?>
     </div>
 </div>

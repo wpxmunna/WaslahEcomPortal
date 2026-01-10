@@ -5,55 +5,107 @@
 <section class="hero-slider">
     <div class="swiper heroSwiper">
         <div class="swiper-wrapper">
-            <!-- Slide 1 -->
+            <?php
+            // Default sliders if none in database
+            $defaultSliders = [
+                [
+                    'title' => 'Elegance Redefined',
+                    'subtitle' => 'New Collection 2025',
+                    'description' => 'Discover the perfect blend of tradition and modernity',
+                    'button_text' => 'Shop Women',
+                    'button_link' => 'shop/category/women',
+                    'button2_text' => 'Shop Men',
+                    'button2_link' => 'shop/category/men',
+                    'image' => null,
+                    'text_position' => 'left',
+                    'text_color' => '#ffffff',
+                    'overlay_opacity' => 0.40,
+                    'default_bg' => 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80'
+                ],
+                [
+                    'title' => 'Authenticity in Every Stitch',
+                    'subtitle' => 'Premium Quality',
+                    'description' => 'Handcrafted with love, designed for you',
+                    'button_text' => 'Explore Collection',
+                    'button_link' => 'shop',
+                    'button2_text' => null,
+                    'button2_link' => null,
+                    'image' => null,
+                    'text_position' => 'left',
+                    'text_color' => '#ffffff',
+                    'overlay_opacity' => 0.40,
+                    'default_bg' => 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80'
+                ],
+                [
+                    'title' => 'Style for Little Ones',
+                    'subtitle' => 'Kids Collection',
+                    'description' => 'Comfort meets fashion for your children',
+                    'button_text' => 'Shop Kids',
+                    'button_link' => 'shop/category/children',
+                    'button2_text' => null,
+                    'button2_link' => null,
+                    'image' => null,
+                    'text_position' => 'left',
+                    'text_color' => '#ffffff',
+                    'overlay_opacity' => 0.40,
+                    'default_bg' => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80'
+                ]
+            ];
+
+            // Use database sliders if available, otherwise use defaults
+            $displaySliders = !empty($sliders) ? $sliders : $defaultSliders;
+            $slideIndex = 0;
+
+            // Fallback images for sliders without uploaded images
+            $fallbackImages = [
+                'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80',
+                'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80',
+                'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80',
+                'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80'
+            ];
+
+            foreach ($displaySliders as $slider):
+                // Determine background image
+                if (!empty($slider['image'])) {
+                    $bgImage = upload('sliders/' . $slider['image']);
+                } elseif (!empty($slider['default_bg'])) {
+                    $bgImage = $slider['default_bg'];
+                } else {
+                    // Use different fallback images based on slide position
+                    $bgImage = $fallbackImages[$slideIndex % count($fallbackImages)];
+                }
+
+                $textPosition = $slider['text_position'] ?? 'left';
+                $textColor = $slider['text_color'] ?? '#ffffff';
+                $overlayOpacity = $slider['overlay_opacity'] ?? 0.40;
+            ?>
             <div class="swiper-slide">
-                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80');">
-                    <div class="hero-overlay"></div>
+                <div class="hero-slide" style="background-image: url('<?= $bgImage ?>');">
+                    <div class="hero-overlay" style="background: rgba(0,0,0,<?= $overlayOpacity ?>);"></div>
                     <div class="container">
-                        <div class="hero-content">
-                            <span class="hero-subtitle">New Collection 2025</span>
-                            <h1 class="hero-title">Elegance<br>Redefined</h1>
-                            <p class="hero-desc">Discover the perfect blend of tradition and modernity</p>
+                        <div class="hero-content text-<?= $textPosition ?>" style="color: <?= $textColor ?>;">
+                            <?php if (!empty($slider['subtitle'])): ?>
+                            <span class="hero-subtitle"><?= sanitize($slider['subtitle']) ?></span>
+                            <?php endif; ?>
+                            <h1 class="hero-title"><?= nl2br(sanitize($slider['title'])) ?></h1>
+                            <?php if (!empty($slider['description'])): ?>
+                            <p class="hero-desc"><?= sanitize($slider['description']) ?></p>
+                            <?php endif; ?>
+                            <?php if (!empty($slider['button_text']) || !empty($slider['button2_text'])): ?>
                             <div class="hero-buttons">
-                                <a href="<?= url('shop/category/women') ?>" class="btn-hero-primary">Shop Women</a>
-                                <a href="<?= url('shop/category/men') ?>" class="btn-hero-secondary">Shop Men</a>
+                                <?php if (!empty($slider['button_text'])): ?>
+                                <a href="<?= url($slider['button_link'] ?? 'shop') ?>" class="btn-hero-primary"><?= sanitize($slider['button_text']) ?></a>
+                                <?php endif; ?>
+                                <?php if (!empty($slider['button2_text'])): ?>
+                                <a href="<?= url($slider['button2_link'] ?? 'shop') ?>" class="btn-hero-secondary"><?= sanitize($slider['button2_text']) ?></a>
+                                <?php endif; ?>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Slide 2 -->
-            <div class="swiper-slide">
-                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80');">
-                    <div class="hero-overlay"></div>
-                    <div class="container">
-                        <div class="hero-content">
-                            <span class="hero-subtitle">Premium Quality</span>
-                            <h1 class="hero-title">Authenticity in<br>Every Stitch</h1>
-                            <p class="hero-desc">Handcrafted with love, designed for you</p>
-                            <div class="hero-buttons">
-                                <a href="<?= url('shop') ?>" class="btn-hero-primary">Explore Collection</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Slide 3 -->
-            <div class="swiper-slide">
-                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80');">
-                    <div class="hero-overlay"></div>
-                    <div class="container">
-                        <div class="hero-content">
-                            <span class="hero-subtitle">Kids Collection</span>
-                            <h1 class="hero-title">Style for<br>Little Ones</h1>
-                            <p class="hero-desc">Comfort meets fashion for your children</p>
-                            <div class="hero-buttons">
-                                <a href="<?= url('shop/category/children') ?>" class="btn-hero-primary">Shop Kids</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <?php $slideIndex++; endforeach; ?>
         </div>
         <div class="swiper-pagination"></div>
         <div class="swiper-button-next"></div>
@@ -117,64 +169,26 @@
 </section>
 
 <!-- New Arrivals Section -->
-<section class="products-section">
+<section class="new-arrivals-section">
     <div class="container">
-        <div class="section-header">
-            <div class="section-header-left">
-                <span class="section-tag">Just In</span>
-                <h2 class="section-title">New Arrivals</h2>
-            </div>
-            <a href="<?= url('shop?sort=newest') ?>" class="section-link">
-                View All <i class="fas fa-long-arrow-alt-right"></i>
-            </a>
+        <div class="section-header centered" data-aos="fade-up">
+            <span class="section-tag"><i class="fas fa-sparkles me-2"></i>Just Landed</span>
+            <h2 class="section-title">New Arrivals</h2>
+            <p class="section-desc">Discover the latest additions to our collection</p>
         </div>
 
-        <div class="products-grid">
-            <?php $productIndex = 0; foreach (array_slice($newArrivals, 0, 8) as $product): ?>
-            <div class="product-item">
-                <div class="product-card-modern">
-                    <div class="product-image">
-                        <a href="<?= url('product/' . $product['slug']) ?>">
-                            <?php
-                            $imgSrc = $product['image'] ? upload($product['image']) : 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80';
-                            ?>
-                            <img src="<?= $imgSrc ?>" alt="<?= sanitize($product['name']) ?>" class="img-primary" loading="<?= $productIndex < 4 ? 'eager' : 'lazy' ?>" decoding="async" width="320" height="320">
-                        </a>
-                        <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
-                        <span class="product-badge sale">-<?= discountPercent($product['price'], $product['sale_price']) ?>%</span>
-                        <?php endif; ?>
-                        <?php if (strtotime($product['created_at']) > strtotime('-7 days')): ?>
-                        <span class="product-badge new">New</span>
-                        <?php endif; ?>
-                        <div class="product-actions">
-                            <button class="action-btn" onclick="addToWishlist(<?= $product['id'] ?>)" title="Add to Wishlist">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="action-btn" onclick="quickView(<?= $product['id'] ?>)" title="Quick View">
-                                <i class="far fa-eye"></i>
-                            </button>
-                            <button class="action-btn" onclick="addToCart(<?= $product['id'] ?>)" title="Add to Cart">
-                                <i class="fas fa-shopping-bag"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <span class="product-category"><?= $product['category_name'] ?? 'Fashion' ?></span>
-                        <h3 class="product-name">
-                            <a href="<?= url('product/' . $product['slug']) ?>"><?= sanitize($product['name']) ?></a>
-                        </h3>
-                        <div class="product-price">
-                            <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
-                            <span class="price-current"><?= formatPrice($product['sale_price']) ?></span>
-                            <span class="price-original"><?= formatPrice($product['price']) ?></span>
-                            <?php else: ?>
-                            <span class="price-current"><?= formatPrice($product['price']) ?></span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
+        <div class="row g-4">
+            <?php foreach (array_slice($newArrivals, 0, 8) as $product): ?>
+            <div class="col-lg-3 col-md-4 col-6" data-aos="fade-up">
+                <?php include ROOT_PATH . '/views/partials/product-card.php'; ?>
             </div>
-            <?php $productIndex++; endforeach; ?>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="<?= url('shop?sort=newest') ?>" class="btn btn-outline-dark btn-lg px-5">
+                View All New Arrivals <i class="fas fa-arrow-right ms-2"></i>
+            </a>
         </div>
     </div>
 </section>
@@ -220,61 +234,26 @@
 </section>
 
 <!-- Featured Products Section -->
-<section class="products-section bg-light">
+<section class="featured-section">
     <div class="container">
-        <div class="section-header centered">
-            <span class="section-tag">Curated For You</span>
+        <div class="section-header centered" data-aos="fade-up">
+            <span class="section-tag"><i class="fas fa-gem me-2"></i>Curated For You</span>
             <h2 class="section-title">Featured Collection</h2>
             <p class="section-desc">Hand-picked pieces that define elegance and style</p>
         </div>
 
-        <div class="products-grid">
+        <div class="row g-4">
             <?php foreach (array_slice($featuredProducts, 0, 8) as $product): ?>
-            <div class="product-item">
-                <div class="product-card-modern">
-                    <div class="product-image">
-                        <a href="<?= url('product/' . $product['slug']) ?>">
-                            <?php
-                            $imgSrc = $product['image'] ? upload($product['image']) : 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80';
-                            ?>
-                            <img src="<?= $imgSrc ?>" alt="<?= sanitize($product['name']) ?>" class="img-primary" loading="lazy" decoding="async" width="320" height="320">
-                        </a>
-                        <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
-                        <span class="product-badge sale">-<?= discountPercent($product['price'], $product['sale_price']) ?>%</span>
-                        <?php endif; ?>
-                        <div class="product-actions">
-                            <button class="action-btn" onclick="addToWishlist(<?= $product['id'] ?>)" title="Add to Wishlist">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="action-btn" onclick="quickView(<?= $product['id'] ?>)" title="Quick View">
-                                <i class="far fa-eye"></i>
-                            </button>
-                            <button class="action-btn" onclick="addToCart(<?= $product['id'] ?>)" title="Add to Cart">
-                                <i class="fas fa-shopping-bag"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <span class="product-category"><?= $product['category_name'] ?? 'Fashion' ?></span>
-                        <h3 class="product-name">
-                            <a href="<?= url('product/' . $product['slug']) ?>"><?= sanitize($product['name']) ?></a>
-                        </h3>
-                        <div class="product-price">
-                            <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
-                            <span class="price-current"><?= formatPrice($product['sale_price']) ?></span>
-                            <span class="price-original"><?= formatPrice($product['price']) ?></span>
-                            <?php else: ?>
-                            <span class="price-current"><?= formatPrice($product['price']) ?></span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-lg-3 col-md-4 col-6" data-aos="fade-up">
+                <?php include ROOT_PATH . '/views/partials/product-card.php'; ?>
             </div>
             <?php endforeach; ?>
         </div>
 
-        <div class="text-center mt-5">
-            <a href="<?= url('shop') ?>" class="btn-view-all">View All Products</a>
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="<?= url('shop') ?>" class="btn btn-outline-dark btn-lg px-5">
+                View All Products <i class="fas fa-arrow-right ms-2"></i>
+            </a>
         </div>
     </div>
 </section>
@@ -288,37 +267,46 @@
             <p class="section-desc">Get inspired by our latest looks</p>
         </div>
 
+        <?php
+        // Default lookbook items if none in database
+        $defaultLookbook = [
+            ['image' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&q=80', 'caption' => 'Summer Collection', 'link' => '', 'is_featured' => 1],
+            ['image' => 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&q=80', 'caption' => 'Street Style', 'link' => '', 'is_featured' => 0],
+            ['image' => 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=300&q=80', 'caption' => 'Elegant Look', 'link' => '', 'is_featured' => 0],
+            ['image' => 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&q=80', 'caption' => 'Casual Vibes', 'link' => '', 'is_featured' => 0],
+            ['image' => 'https://images.unsplash.com/photo-1485968579169-11d4a1fa432d?w=300&q=80', 'caption' => 'Evening Wear', 'link' => '', 'is_featured' => 0],
+        ];
+
+        $displayLookbook = !empty($lookbookItems) ? $lookbookItems : $defaultLookbook;
+        $lookbookIndex = 0;
+        ?>
+
         <div class="lookbook-grid">
-            <div class="lookbook-item large">
-                <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&q=80" alt="Lookbook" loading="lazy" decoding="async">
+            <?php foreach (array_slice($displayLookbook, 0, 5) as $item):
+                // Determine image URL
+                if (filter_var($item['image'], FILTER_VALIDATE_URL)) {
+                    $imageUrl = $item['image'];
+                } elseif (!empty($item['image'])) {
+                    $imageUrl = upload('lookbook/' . $item['image']);
+                } else {
+                    $imageUrl = 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&q=80';
+                }
+
+                // First item or featured item gets 'large' class
+                $isLarge = ($lookbookIndex === 0) || (!empty($item['is_featured']));
+                $itemClass = $isLarge ? 'lookbook-item large' : 'lookbook-item';
+                $linkUrl = !empty($item['link']) ? $item['link'] : '#';
+            ?>
+            <<?= !empty($item['link']) ? 'a href="' . sanitize($item['link']) . '" target="_blank"' : 'div' ?> class="<?= $itemClass ?>">
+                <img src="<?= $imageUrl ?>" alt="<?= sanitize($item['caption'] ?? 'Lookbook') ?>" loading="lazy" decoding="async">
                 <div class="lookbook-overlay">
                     <i class="fab fa-instagram"></i>
+                    <?php if (!empty($item['caption'])): ?>
+                    <span class="lookbook-caption"><?= sanitize($item['caption']) ?></span>
+                    <?php endif; ?>
                 </div>
-            </div>
-            <div class="lookbook-item">
-                <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&q=80" alt="Lookbook" loading="lazy" decoding="async">
-                <div class="lookbook-overlay">
-                    <i class="fab fa-instagram"></i>
-                </div>
-            </div>
-            <div class="lookbook-item">
-                <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=300&q=80" alt="Lookbook" loading="lazy" decoding="async">
-                <div class="lookbook-overlay">
-                    <i class="fab fa-instagram"></i>
-                </div>
-            </div>
-            <div class="lookbook-item">
-                <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&q=80" alt="Lookbook" loading="lazy" decoding="async">
-                <div class="lookbook-overlay">
-                    <i class="fab fa-instagram"></i>
-                </div>
-            </div>
-            <div class="lookbook-item">
-                <img src="https://images.unsplash.com/photo-1485968579169-11d4a1fa432d?w=300&q=80" alt="Lookbook" loading="lazy" decoding="async">
-                <div class="lookbook-overlay">
-                    <i class="fab fa-instagram"></i>
-                </div>
-            </div>
+            </<?= !empty($item['link']) ? 'a' : 'div' ?>>
+            <?php $lookbookIndex++; endforeach; ?>
         </div>
     </div>
 </section>

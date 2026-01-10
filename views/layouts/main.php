@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?? SITE_NAME . ' - ' . SITE_TAGLINE ?></title>
     <meta name="description" content="<?= $metaDescription ?? 'Waslah - Authenticity in Every Stitch. Quality fashion for Men, Women, and Children.' ?>">
+    <meta name="theme-color" content="#0F2027">
 
-    <!-- Fonts -->
+    <!-- Fonts - Premium Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,105 +18,140 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
 
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
     <!-- Custom CSS -->
     <link href="<?= asset('css/style.css') ?>" rel="stylesheet">
 </head>
 <body>
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <span><i class="fas fa-phone-alt me-2"></i> +1 234 567 890</span>
-                    <span class="ms-3"><i class="fas fa-envelope me-2"></i> info@waslah.com</span>
-                </div>
-                <div class="col-md-6 text-end">
-                    <span>Free Shipping on Orders Over <?= formatPrice(FREE_SHIPPING_THRESHOLD) ?></span>
+    <!-- Modern Header -->
+    <header class="site-header">
+        <!-- Top Strip -->
+        <div class="header-top">
+            <div class="container">
+                <div class="header-top-inner">
+                    <div class="header-top-left">
+                        <span class="promo-text">
+                            <i class="fas fa-truck"></i>
+                            Free Shipping on Orders Over <?= formatPrice(FREE_SHIPPING_THRESHOLD) ?>
+                        </span>
+                    </div>
+                    <div class="header-top-right">
+                        <a href="tel:+1234567890"><i class="fas fa-phone-alt"></i> +1 234 567 890</a>
+                        <a href="mailto:info@waslah.com"><i class="fas fa-envelope"></i> info@waslah.com</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Header -->
-    <header class="main-header">
-        <div class="container">
-            <nav class="navbar navbar-expand-lg">
-                <a class="navbar-brand" href="<?= url() ?>">
-                    <img src="<?= asset('images/logo.png') ?>" alt="Waslah" class="logo-img">
-                </a>
+        <!-- Main Header -->
+        <div class="header-main">
+            <div class="container">
+                <div class="header-inner">
+                    <!-- Mobile Menu Toggle -->
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                    <!-- Logo -->
+                    <a href="<?= url() ?>" class="site-logo">
+                        <img src="<?= asset('images/logo.png') ?>" alt="<?= SITE_NAME ?>">
+                    </a>
 
-                <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav mx-auto">
-                        <li class="nav-item">
-                            <a class="nav-link <?= activeClass('') ?>" href="<?= url() ?>">Home</a>
-                        </li>
-                        <?php foreach ($categories as $category): ?>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="<?= url('shop/category/' . $category['slug']) ?>" data-bs-toggle="dropdown">
-                                <?= $category['name'] ?>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="<?= url('shop/category/' . $category['slug']) ?>">All <?= $category['name'] ?></a></li>
-                                <?php
-                                $subCategories = (new Category())->getChildren($category['id']);
-                                foreach ($subCategories as $sub):
-                                ?>
-                                <li><a class="dropdown-item" href="<?= url('shop/category/' . $sub['slug']) ?>"><?= $sub['name'] ?></a></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </li>
-                        <?php endforeach; ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= url('shop') ?>">Shop</a>
-                        </li>
-                    </ul>
+                    <!-- Main Navigation -->
+                    <nav class="main-nav" id="mainNav">
+                        <ul class="nav-menu">
+                            <li class="nav-item">
+                                <a href="<?= url() ?>" class="nav-link <?= activeClass('') ?>">Home</a>
+                            </li>
+                            <?php foreach ($categories as $category): ?>
+                            <li class="nav-item has-dropdown">
+                                <a href="<?= url('shop/category/' . $category['slug']) ?>" class="nav-link">
+                                    <?= $category['name'] ?>
+                                    <i class="fas fa-chevron-down"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="<?= url('shop/category/' . $category['slug']) ?>">All <?= $category['name'] ?></a></li>
+                                    <?php
+                                    $subCategories = (new Category())->getChildren($category['id']);
+                                    foreach ($subCategories as $sub):
+                                    ?>
+                                    <li><a href="<?= url('shop/category/' . $sub['slug']) ?>"><?= $sub['name'] ?></a></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </li>
+                            <?php endforeach; ?>
+                            <li class="nav-item">
+                                <a href="<?= url('shop') ?>" class="nav-link">Shop All</a>
+                            </li>
+                        </ul>
+                    </nav>
 
+                    <!-- Header Actions -->
                     <div class="header-actions">
-                        <!-- Search -->
-                        <form class="search-form" action="<?= url('search') ?>" method="GET">
-                            <input type="text" name="q" placeholder="Search..." class="form-control">
-                            <button type="submit"><i class="fas fa-search"></i></button>
-                        </form>
+                        <!-- Search Toggle -->
+                        <button class="action-btn search-toggle" id="searchToggle" aria-label="Search">
+                            <i class="fas fa-search"></i>
+                        </button>
 
-                        <!-- User -->
-                        <div class="dropdown">
-                            <a href="#" class="header-icon" data-bs-toggle="dropdown">
+                        <!-- User Account -->
+                        <div class="action-btn user-dropdown">
+                            <button class="dropdown-trigger" aria-label="Account">
                                 <i class="fas fa-user"></i>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
+                            </button>
+                            <div class="dropdown-content">
                                 <?php if ($isLoggedIn): ?>
-                                    <li><a class="dropdown-item" href="<?= url('account') ?>"><i class="fas fa-user me-2"></i> My Account</a></li>
-                                    <li><a class="dropdown-item" href="<?= url('account/orders') ?>"><i class="fas fa-box me-2"></i> My Orders</a></li>
-                                    <li><a class="dropdown-item" href="<?= url('wishlist') ?>"><i class="fas fa-heart me-2"></i> Wishlist</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="<?= url('logout') ?>"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                                <div class="dropdown-header">
+                                    <span>Welcome back!</span>
+                                </div>
+                                <a href="<?= url('account') ?>"><i class="fas fa-user"></i> My Account</a>
+                                <a href="<?= url('account/orders') ?>"><i class="fas fa-box"></i> My Orders</a>
+                                <a href="<?= url('wishlist') ?>"><i class="fas fa-heart"></i> Wishlist</a>
+                                <div class="dropdown-divider"></div>
+                                <a href="<?= url('logout') ?>" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
                                 <?php else: ?>
-                                    <li><a class="dropdown-item" href="<?= url('login') ?>"><i class="fas fa-sign-in-alt me-2"></i> Login</a></li>
-                                    <li><a class="dropdown-item" href="<?= url('register') ?>"><i class="fas fa-user-plus me-2"></i> Register</a></li>
+                                <div class="dropdown-header">
+                                    <span>My Account</span>
+                                </div>
+                                <a href="<?= url('login') ?>"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+                                <a href="<?= url('register') ?>"><i class="fas fa-user-plus"></i> Create Account</a>
                                 <?php endif; ?>
-                            </ul>
+                            </div>
                         </div>
 
                         <!-- Wishlist -->
-                        <a href="<?= url('wishlist') ?>" class="header-icon">
+                        <a href="<?= url('wishlist') ?>" class="action-btn" aria-label="Wishlist">
                             <i class="fas fa-heart"></i>
                         </a>
 
                         <!-- Cart -->
-                        <a href="<?= url('cart') ?>" class="header-icon cart-icon">
+                        <a href="<?= url('cart') ?>" class="action-btn cart-btn" aria-label="Cart">
                             <i class="fas fa-shopping-bag"></i>
                             <?php if ($cartCount > 0): ?>
-                            <span class="cart-count"><?= $cartCount ?></span>
+                            <span class="cart-badge"><?= $cartCount ?></span>
                             <?php endif; ?>
                         </a>
                     </div>
                 </div>
-            </nav>
+            </div>
         </div>
+
+        <!-- Search Overlay -->
+        <div class="search-overlay" id="searchOverlay">
+            <div class="search-overlay-inner">
+                <form action="<?= url('search') ?>" method="GET" class="search-form">
+                    <input type="text" name="q" placeholder="Search for products..." autocomplete="off">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <button class="search-close" id="searchClose"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
     </header>
 
     <!-- Flash Messages -->
@@ -206,11 +242,101 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
     <!-- Custom JS -->
     <script src="<?= asset('js/main.js') ?>"></script>
 
     <script>
         const SITE_URL = '<?= SITE_URL ?>';
+
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 50
+        });
+
+        // Mobile Menu Toggle
+        (function() {
+            const menuToggle = document.getElementById('mobileMenuToggle');
+            const mainNav = document.getElementById('mainNav');
+            const menuOverlay = document.getElementById('mobileMenuOverlay');
+
+            if (menuToggle && mainNav) {
+                menuToggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    mainNav.classList.toggle('active');
+                    menuOverlay.classList.toggle('active');
+                    document.body.style.overflow = mainNav.classList.contains('active') ? 'hidden' : '';
+                });
+
+                if (menuOverlay) {
+                    menuOverlay.addEventListener('click', function() {
+                        menuToggle.classList.remove('active');
+                        mainNav.classList.remove('active');
+                        this.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                }
+
+                // Mobile dropdown toggle
+                document.querySelectorAll('.nav-item.has-dropdown > .nav-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        if (window.innerWidth <= 991) {
+                            e.preventDefault();
+                            this.parentElement.classList.toggle('dropdown-open');
+                        }
+                    });
+                });
+            }
+        })();
+
+        // Search Overlay
+        (function() {
+            const searchToggle = document.getElementById('searchToggle');
+            const searchOverlay = document.getElementById('searchOverlay');
+            const searchClose = document.getElementById('searchClose');
+            const searchInput = searchOverlay ? searchOverlay.querySelector('input') : null;
+
+            if (searchToggle && searchOverlay) {
+                searchToggle.addEventListener('click', function() {
+                    searchOverlay.classList.add('active');
+                    if (searchInput) {
+                        setTimeout(() => searchInput.focus(), 300);
+                    }
+                });
+
+                if (searchClose) {
+                    searchClose.addEventListener('click', function() {
+                        searchOverlay.classList.remove('active');
+                    });
+                }
+
+                // Close on escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && searchOverlay.classList.contains('active')) {
+                        searchOverlay.classList.remove('active');
+                    }
+                });
+            }
+        })();
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
     </script>
 </body>
 </html>

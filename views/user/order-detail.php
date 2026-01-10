@@ -121,8 +121,8 @@
                                                         </div>
                                                     </td>
                                                     <td class="text-center align-middle"><?= $item['quantity'] ?></td>
-                                                    <td class="text-end align-middle"><?= formatPrice($item['price']) ?></td>
-                                                    <td class="text-end align-middle fw-bold"><?= formatPrice($item['price'] * $item['quantity']) ?></td>
+                                                    <td class="text-end align-middle"><?= formatPrice($item['unit_price'] ?? $item['price'] ?? 0) ?></td>
+                                                    <td class="text-end align-middle fw-bold"><?= formatPrice(($item['unit_price'] ?? $item['price'] ?? 0) * $item['quantity']) ?></td>
                                                 </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
