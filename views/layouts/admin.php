@@ -238,6 +238,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="<?= url('admin/social-media') ?>" class="nav-link <?= activeClass('admin/social-media') ?>">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Social Media</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?= url('admin/meta') ?>" class="nav-link <?= activeClass('admin/meta') ?>">
+                            <i class="fab fa-meta"></i>
+                            <span>Meta Business</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="<?= url('admin/settings') ?>" class="nav-link <?= activeClass('admin/settings') ?>">
                             <i class="fas fa-cog"></i>
                             <span>Settings</span>

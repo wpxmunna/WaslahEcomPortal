@@ -288,7 +288,7 @@
             position: relative;
         }
 
-        .input-wrapper i {
+        .input-wrapper > i {
             position: absolute;
             left: 16px;
             top: 50%;
@@ -296,6 +296,7 @@
             color: var(--gray-400);
             font-size: 16px;
             transition: color 0.3s ease;
+            z-index: 1;
         }
 
         .form-control {
@@ -321,7 +322,7 @@
         }
 
         .form-control:focus + i,
-        .input-wrapper:focus-within i {
+        .input-wrapper:focus-within > i {
             color: var(--accent-gold);
         }
 

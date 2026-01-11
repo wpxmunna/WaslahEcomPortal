@@ -286,6 +286,53 @@ $router->add('admin/payroll/components/store', 'AdminPayrollController', 'storeC
 $router->add('admin/payroll/employee-salary/{id}', 'AdminPayrollController', 'employeeSalary');
 $router->add('admin/payroll/employee-salary/update/{id}', 'AdminPayrollController', 'updateEmployeeSalary');
 
+// Admin Social Media Manager
+$router->add('admin/social-media', 'AdminSocialMediaController', 'index');
+$router->add('admin/social-media/create', 'AdminSocialMediaController', 'create');
+$router->add('admin/social-media/store', 'AdminSocialMediaController', 'store');
+$router->add('admin/social-media/edit/{id}', 'AdminSocialMediaController', 'edit');
+$router->add('admin/social-media/update/{id}', 'AdminSocialMediaController', 'update');
+$router->add('admin/social-media/delete/{id}', 'AdminSocialMediaController', 'delete');
+$router->add('admin/social-media/toggle/{id}', 'AdminSocialMediaController', 'toggle');
+$router->add('admin/social-media/update-order', 'AdminSocialMediaController', 'updateOrder');
+
+// Campaign Messages
+$router->add('admin/social-media/campaigns', 'AdminSocialMediaController', 'campaigns');
+$router->add('admin/social-media/campaigns/create', 'AdminSocialMediaController', 'createCampaign');
+$router->add('admin/social-media/campaigns/store', 'AdminSocialMediaController', 'storeCampaign');
+$router->add('admin/social-media/campaigns/edit/{id}', 'AdminSocialMediaController', 'editCampaign');
+$router->add('admin/social-media/campaigns/update/{id}', 'AdminSocialMediaController', 'updateCampaign');
+$router->add('admin/social-media/campaigns/delete/{id}', 'AdminSocialMediaController', 'deleteCampaign');
+$router->add('admin/social-media/campaigns/toggle/{id}', 'AdminSocialMediaController', 'toggleCampaign');
+$router->add('admin/social-media/campaigns/pin/{id}', 'AdminSocialMediaController', 'pinCampaign');
+$router->add('admin/social-media/campaigns/duplicate/{id}', 'AdminSocialMediaController', 'duplicateCampaign');
+$router->add('admin/social-media/campaigns/copy/{id}', 'AdminSocialMediaController', 'copyCampaign');
+
+// Campaign Analytics & Insights
+$router->add('admin/social-media/insights', 'AdminSocialMediaController', 'insights');
+$router->add('admin/social-media/campaigns/performance/{id}', 'AdminSocialMediaController', 'campaignPerformance');
+$router->add('admin/social-media/campaigns/track/{id}', 'AdminSocialMediaController', 'trackEvent');
+$router->add('admin/social-media/campaigns/goal/{id}', 'AdminSocialMediaController', 'addGoal');
+$router->add('admin/social-media/campaigns/note/{id}', 'AdminSocialMediaController', 'addNote');
+$router->add('admin/social-media/campaigns/note/delete/{id}/{noteId}', 'AdminSocialMediaController', 'deleteNote');
+$router->add('admin/social-media/campaigns/export/{id}', 'AdminSocialMediaController', 'exportAnalytics');
+
+// Meta Business Suite Integration
+$router->add('admin/meta', 'AdminMetaController', 'index');
+$router->add('admin/meta/connect', 'AdminMetaController', 'connect');
+$router->add('admin/meta/callback', 'AdminMetaController', 'callback');
+$router->add('admin/meta/select-pages', 'AdminMetaController', 'selectPages');
+$router->add('admin/meta/save-pages', 'AdminMetaController', 'savePages');
+$router->add('admin/meta/disconnect/{platform}', 'AdminMetaController', 'disconnect');
+$router->add('admin/meta/facebook-insights', 'AdminMetaController', 'facebookInsights');
+$router->add('admin/meta/instagram-insights', 'AdminMetaController', 'instagramInsights');
+$router->add('admin/meta/messages', 'AdminMetaController', 'messages');
+$router->add('admin/meta/messages/{platform}', 'AdminMetaController', 'messages');
+$router->add('admin/meta/send-message', 'AdminMetaController', 'sendMessage');
+$router->add('admin/meta/sync-insights/{platform}', 'AdminMetaController', 'syncInsights');
+$router->add('admin/meta/settings', 'AdminMetaController', 'settings');
+$router->add('admin/meta/webhook', 'AdminMetaController', 'webhook');
+
 // API endpoints for AJAX
 $router->add('api/cart/count', 'CartController', 'count');
 $router->add('api/products/filter', 'ProductController', 'filter');

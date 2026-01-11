@@ -41,3 +41,9 @@ define('TAX_RATE', 0.00); // 0%
 // Shipping (in BDT)
 define('FREE_SHIPPING_THRESHOLD', 5000.00);  // Free shipping over ৳5000
 define('DEFAULT_SHIPPING_COST', 80.00);       // ৳80 shipping cost
+
+// Meta Business Suite Integration (Facebook, Instagram, WhatsApp)
+// Get these from https://developers.facebook.com/apps
+define('META_APP_ID', '');           // Your Meta App ID
+define('META_APP_SECRET', '');       // Your Meta App Secret
+define('META_WEBHOOK_VERIFY_TOKEN', 'waslah_verify_token');  // Custom token for webhook verification

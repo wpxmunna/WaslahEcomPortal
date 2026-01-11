@@ -40,6 +40,17 @@
                     <div class="header-top-right">
                         <a href="tel:+1234567890"><i class="fas fa-phone-alt"></i> +1 234 567 890</a>
                         <a href="mailto:info@waslah.com"><i class="fas fa-envelope"></i> info@waslah.com</a>
+                        <?php if (!empty($socialLinksHeader)): ?>
+                        <span class="header-social-links">
+                            <?php foreach ($socialLinksHeader as $link): ?>
+                            <a href="<?= htmlspecialchars($link['url']) ?>"
+                               <?= $link['open_new_tab'] ? 'target="_blank" rel="noopener"' : '' ?>
+                               title="<?= htmlspecialchars($link['name']) ?>">
+                                <i class="fa-<?= $link['icon_style'] ?> <?= htmlspecialchars($link['icon']) ?>"></i>
+                            </a>
+                            <?php endforeach; ?>
+                        </span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -178,10 +189,14 @@
                         <img src="<?= asset('images/logo.png') ?>" alt="Waslah" class="footer-logo mb-3">
                         <p>Authenticity in Every Stitch. Quality clothing for Men, Women, and Children.</p>
                         <div class="social-links">
-                            <a href="#"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="fab fa-pinterest"></i></a>
+                            <?php foreach ($socialLinksFooter as $link): ?>
+                            <a href="<?= htmlspecialchars($link['url']) ?>"
+                               <?= $link['open_new_tab'] ? 'target="_blank" rel="noopener"' : '' ?>
+                               title="<?= htmlspecialchars($link['name']) ?>"
+                               style="background-color: <?= htmlspecialchars($link['color']) ?>">
+                                <i class="fa-<?= $link['icon_style'] ?> <?= htmlspecialchars($link['icon']) ?>"></i>
+                            </a>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-6 mb-4">

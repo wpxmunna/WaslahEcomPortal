@@ -23,6 +23,8 @@ class Controller
         $this->data['currentStore'] = $this->getCurrentStore();
         $this->data['flash'] = Session::getFlash();
         $this->data['stores'] = $this->getStores();
+        $this->data['socialLinksHeader'] = $this->getSocialLinks('header');
+        $this->data['socialLinksFooter'] = $this->getSocialLinks('footer');
     }
 
     /**
@@ -174,6 +176,22 @@ class Controller
     private function getStores(): array
     {
         return $this->db->fetchAll("SELECT * FROM stores WHERE status = 1 ORDER BY name");
+    }
+
+    /**
+     * Get social media links for header or footer
+     */
+    private function getSocialLinks(string $location = 'footer'): array
+    {
+        $storeId = Session::get('current_store_id', 1);
+        $column = $location === 'header' ? 'show_in_header' : 'show_in_footer';
+
+        return $this->db->fetchAll(
+            "SELECT * FROM social_media
+             WHERE store_id = ? AND is_active = 1 AND {$column} = 1
+             ORDER BY sort_order",
+            [$storeId]
+        );
     }
 
     /**
