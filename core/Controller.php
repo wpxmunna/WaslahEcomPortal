@@ -183,15 +183,20 @@ class Controller
      */
     private function getSocialLinks(string $location = 'footer'): array
     {
-        $storeId = Session::get('current_store_id', 1);
-        $column = $location === 'header' ? 'show_in_header' : 'show_in_footer';
+        try {
+            $storeId = Session::get('current_store_id', 1);
+            $position = $location === 'header' ? 'header' : 'footer';
 
-        return $this->db->fetchAll(
-            "SELECT * FROM social_media
-             WHERE store_id = ? AND is_active = 1 AND {$column} = 1
-             ORDER BY sort_order",
-            [$storeId]
-        );
+            return $this->db->fetchAll(
+                "SELECT * FROM social_media_links
+                 WHERE store_id = ? AND (position = ? OR position = 'both') AND is_active = 1
+                 ORDER BY sort_order",
+                [$storeId, $position]
+            );
+        } catch (Exception $e) {
+            // Table doesn't exist yet, return empty array
+            return [];
+        }
     }
 
     /**

@@ -38,8 +38,20 @@
                         </span>
                     </div>
                     <div class="header-top-right">
-                        <a href="tel:+1234567890"><i class="fas fa-phone-alt"></i> +1 234 567 890</a>
-                        <a href="mailto:info@waslah.com"><i class="fas fa-envelope"></i> info@waslah.com</a>
+                        <?php
+                        $headerPhone = getBusinessSetting('business_phone');
+                        $headerEmail = getBusinessSetting('business_email');
+                        ?>
+                        <?php if ($headerPhone): ?>
+                        <a href="tel:<?= htmlspecialchars(str_replace(' ', '', $headerPhone)) ?>">
+                            <i class="fas fa-phone-alt"></i> <?= htmlspecialchars($headerPhone) ?>
+                        </a>
+                        <?php endif; ?>
+                        <?php if ($headerEmail): ?>
+                        <a href="mailto:<?= htmlspecialchars($headerEmail) ?>">
+                            <i class="fas fa-envelope"></i> <?= htmlspecialchars($headerEmail) ?>
+                        </a>
+                        <?php endif; ?>
                         <?php if (!empty($socialLinksHeader)): ?>
                         <span class="header-social-links">
                             <?php foreach ($socialLinksHeader as $link): ?>
@@ -50,6 +62,26 @@
                             </a>
                             <?php endforeach; ?>
                         </span>
+                        <?php else: ?>
+                        <?php
+                        // Fallback to business settings if Social Media Manager not configured
+                        $facebookUrl = getBusinessSetting('facebook_page_url');
+                        $whatsappLink = getBusinessSetting('whatsapp_link');
+                        ?>
+                        <?php if ($facebookUrl || $whatsappLink): ?>
+                        <span class="header-social-links">
+                            <?php if ($facebookUrl): ?>
+                            <a href="<?= htmlspecialchars($facebookUrl) ?>" target="_blank" rel="noopener" title="Facebook">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            <?php endif; ?>
+                            <?php if ($whatsappLink): ?>
+                            <a href="<?= htmlspecialchars($whatsappLink) ?>" target="_blank" rel="noopener" title="WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            <?php endif; ?>
+                        </span>
+                        <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -189,6 +221,7 @@
                         <img src="<?= asset('images/logo.png') ?>" alt="Waslah" class="footer-logo mb-3">
                         <p>Authenticity in Every Stitch. Quality clothing for Men, Women, and Children.</p>
                         <div class="social-links">
+                            <?php if (!empty($socialLinksFooter)): ?>
                             <?php foreach ($socialLinksFooter as $link): ?>
                             <a href="<?= htmlspecialchars($link['url']) ?>"
                                <?= $link['open_new_tab'] ? 'target="_blank" rel="noopener"' : '' ?>
@@ -197,6 +230,23 @@
                                 <i class="fa-<?= $link['icon_style'] ?> <?= htmlspecialchars($link['icon']) ?>"></i>
                             </a>
                             <?php endforeach; ?>
+                            <?php else: ?>
+                            <?php
+                            // Fallback to business settings if Social Media Manager not configured
+                            $footerFacebook = getBusinessSetting('facebook_page_url');
+                            $footerWhatsapp = getBusinessSetting('whatsapp_link');
+                            ?>
+                            <?php if ($footerFacebook): ?>
+                            <a href="<?= htmlspecialchars($footerFacebook) ?>" target="_blank" rel="noopener" title="Facebook" style="background-color: #1877f2">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            <?php endif; ?>
+                            <?php if ($footerWhatsapp): ?>
+                            <a href="<?= htmlspecialchars($footerWhatsapp) ?>" target="_blank" rel="noopener" title="WhatsApp" style="background-color: #25d366">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-6 mb-4">
@@ -220,14 +270,44 @@
                         </ul>
                     </div>
                     <div class="col-lg-4 col-md-6 mb-4">
-                        <h5>Newsletter</h5>
-                        <p>Subscribe to get special offers and updates.</p>
-                        <form class="newsletter-form">
-                            <div class="input-group">
-                                <input type="email" class="form-control" placeholder="Your email">
-                                <button class="btn btn-primary" type="submit">Subscribe</button>
-                            </div>
-                        </form>
+                        <h5>Contact Us</h5>
+                        <?php
+                        $businessEmail = getBusinessSetting('business_email');
+                        $businessPhone = getBusinessSetting('business_phone');
+                        $whatsappNumber = getBusinessSetting('whatsapp_number');
+                        $whatsappLink = getBusinessSetting('whatsapp_link');
+                        $businessAddress = getBusinessSetting('business_address');
+                        ?>
+                        <?php if ($businessEmail): ?>
+                        <p class="mb-2">
+                            <i class="fas fa-envelope me-2"></i>
+                            <a href="mailto:<?= htmlspecialchars($businessEmail) ?>" class="text-white text-decoration-none">
+                                <?= htmlspecialchars($businessEmail) ?>
+                            </a>
+                        </p>
+                        <?php endif; ?>
+                        <?php if ($businessPhone): ?>
+                        <p class="mb-2">
+                            <i class="fas fa-phone me-2"></i>
+                            <a href="tel:<?= htmlspecialchars($businessPhone) ?>" class="text-white text-decoration-none">
+                                <?= htmlspecialchars($businessPhone) ?>
+                            </a>
+                        </p>
+                        <?php endif; ?>
+                        <?php if ($whatsappNumber && $whatsappLink): ?>
+                        <p class="mb-2">
+                            <i class="fab fa-whatsapp me-2"></i>
+                            <a href="<?= htmlspecialchars($whatsappLink) ?>" target="_blank" class="text-white text-decoration-none">
+                                <?= htmlspecialchars($whatsappNumber) ?>
+                            </a>
+                        </p>
+                        <?php endif; ?>
+                        <?php if ($businessAddress): ?>
+                        <p class="mb-2">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            <?= nl2br(htmlspecialchars($businessAddress)) ?>
+                        </p>
+                        <?php endif; ?>
                         <div class="payment-methods mt-3">
                             <i class="fab fa-cc-visa fa-2x"></i>
                             <i class="fab fa-cc-mastercard fa-2x"></i>

@@ -120,6 +120,23 @@ The business settings work alongside the Social Media Manager (`admin/social-med
 - Contact information display
 - Quick access to business tools
 
+## Where Business Settings Are Used
+
+The business settings are automatically integrated throughout the application:
+
+### Frontend (Customer-Facing)
+- **Header Contact Bar** (`views/layouts/main.php:40-74`): Displays business phone, email, and social icons (Facebook, WhatsApp)
+- **Footer Contact Section** (`views/layouts/main.php:240-278`): Shows business email, phone, WhatsApp, and address
+- **Footer Social Links** (`views/layouts/main.php:211-226`): Facebook and WhatsApp icons with brand colors
+
+### Admin Panel
+- **Dashboard Quick Links** (`views/admin/dashboard.php:167-204`): Direct access buttons to:
+  - Facebook Page
+  - WhatsApp
+  - Pathao Login
+  - SteadFast
+- **Settings Page** (`admin/settings/business`): Centralized management interface
+
 ## Security Notes
 
 - All URLs are validated on input

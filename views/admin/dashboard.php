@@ -163,5 +163,43 @@
                 </div>
             </div>
         </div>
+
+        <!-- Business Quick Links -->
+        <?php
+        $businessLinks = [
+            'facebook_page_url' => ['icon' => 'fab fa-facebook', 'label' => 'Facebook Page', 'color' => 'primary'],
+            'whatsapp_link' => ['icon' => 'fab fa-whatsapp', 'label' => 'WhatsApp', 'color' => 'success'],
+            'pathao_login_url' => ['icon' => 'fas fa-shipping-fast', 'label' => 'Pathao', 'color' => 'warning'],
+            'steadfast_url' => ['icon' => 'fas fa-truck', 'label' => 'SteadFast', 'color' => 'success']
+        ];
+        $hasLinks = false;
+        foreach ($businessLinks as $key => $config) {
+            if (getBusinessSetting($key)) {
+                $hasLinks = true;
+                break;
+            }
+        }
+        ?>
+        <?php if ($hasLinks): ?>
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-external-link-alt me-2"></i>Business Links</span>
+                <a href="<?= url('admin/settings/business') ?>" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-cog"></i>
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <?php foreach ($businessLinks as $key => $config): ?>
+                        <?php if ($url = getBusinessSetting($key)): ?>
+                        <a href="<?= htmlspecialchars($url) ?>" target="_blank" class="btn btn-outline-<?= $config['color'] ?> btn-sm">
+                            <i class="<?= $config['icon'] ?> me-2"></i><?= $config['label'] ?>
+                        </a>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>

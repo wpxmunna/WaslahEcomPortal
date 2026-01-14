@@ -40,7 +40,7 @@ class AdminSettingsController extends Controller
 
         // Verify CSRF
         if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
-            Session::flash('error', 'Invalid request');
+            Session::setFlash('error', 'Invalid request');
             $this->redirect('admin/settings');
         }
 
@@ -85,7 +85,7 @@ class AdminSettingsController extends Controller
             $this->saveSetting($storeId, $key, $value);
         }
 
-        Session::flash('success', 'Settings updated successfully');
+        Session::setFlash('success', 'Settings updated successfully');
         $this->redirect('admin/settings');
     }
 
@@ -108,7 +108,7 @@ class AdminSettingsController extends Controller
 
         // Verify CSRF
         if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
-            Session::flash('error', 'Invalid request');
+            Session::setFlash('error', 'Invalid request');
             $this->redirect('admin/settings/payment');
         }
 
@@ -129,7 +129,7 @@ class AdminSettingsController extends Controller
             $this->saveSetting($storeId, $key, $value);
         }
 
-        Session::flash('success', 'Payment settings updated successfully');
+        Session::setFlash('success', 'Payment settings updated successfully');
         $this->redirect('admin/settings/payment');
     }
 
@@ -152,7 +152,7 @@ class AdminSettingsController extends Controller
 
         // Verify CSRF
         if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
-            Session::flash('error', 'Invalid request');
+            Session::setFlash('error', 'Invalid request');
             $this->redirect('admin/settings/email');
         }
 
@@ -172,7 +172,7 @@ class AdminSettingsController extends Controller
             $this->saveSetting($storeId, $key, $value);
         }
 
-        Session::flash('success', 'Email settings updated successfully');
+        Session::setFlash('success', 'Email settings updated successfully');
         $this->redirect('admin/settings/email');
     }
 
@@ -268,7 +268,7 @@ class AdminSettingsController extends Controller
 
         // Verify CSRF
         if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
-            Session::flash('error', 'Invalid request');
+            Session::setFlash('error', 'Invalid request');
             $this->redirect('admin/settings/business');
             return;
         }
@@ -282,7 +282,7 @@ class AdminSettingsController extends Controller
         // Update settings
         $this->businessSettingModel->updateBulk($storeId, $settings);
 
-        Session::flash('success', 'Business information updated successfully');
+        Session::setFlash('success', 'Business information updated successfully');
         $this->redirect('admin/settings/business');
     }
 }

@@ -281,3 +281,43 @@ function requireFullAdmin(): void
         redirect('admin');
     }
 }
+
+/**
+ * Get business setting value
+ */
+function getBusinessSetting(string $key, $default = null)
+{
+    static $settings = null;
+
+    if ($settings === null) {
+        try {
+            $businessModel = new BusinessSetting();
+            $storeId = Session::get('admin_store_id', 1);
+            $settings = $businessModel->getByStore($storeId);
+        } catch (Exception $e) {
+            $settings = [];
+        }
+    }
+
+    return $settings[$key] ?? $default;
+}
+
+/**
+ * Get all business settings
+ */
+function getBusinessSettings(): array
+{
+    static $settings = null;
+
+    if ($settings === null) {
+        try {
+            $businessModel = new BusinessSetting();
+            $storeId = Session::get('admin_store_id', 1);
+            $settings = $businessModel->getByStore($storeId);
+        } catch (Exception $e) {
+            $settings = [];
+        }
+    }
+
+    return $settings;
+}
