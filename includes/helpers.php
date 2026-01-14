@@ -119,16 +119,6 @@ function isActiveUrl(string $path): bool
  */
 function activeClass(string $path, string $class = 'active'): string
 {
-    $current = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-
-    // Special handling for POS section - highlight all POS menu items when in any POS page
-    if (strpos($current, 'admin/pos') === 0) {
-        $posPages = ['admin/pos', 'admin/pos/terminal', 'admin/pos/transactions', 'admin/pos/shifts'];
-        if (in_array($path, $posPages)) {
-            return $class;
-        }
-    }
-
     return isActiveUrl($path) ? $class : '';
 }
 
