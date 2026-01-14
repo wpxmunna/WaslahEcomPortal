@@ -409,6 +409,66 @@
     </div>
 </div>
 
+<!-- Modern Confirmation Modal -->
+<div class="modal fade" id="simulateProgressModal" tabindex="-1" aria-labelledby="simulateProgressModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="simulateProgressModalLabel">
+                    <i class="fas fa-forward me-2"></i>Simulate Shipment Progress
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-3">
+                    <div class="mb-4">
+                        <i class="fas fa-shipping-fast fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="mb-3">Progress Shipment Status?</h5>
+                    <p class="text-muted mb-0">
+                        This will move the shipment to the next status in the delivery workflow.
+                        The order status will be updated accordingly.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="confirmSimulateBtn">
+                    <i class="fas fa-check me-1"></i>Yes, Progress
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-check-circle me-2"></i>
+                <span id="toastMessage"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Error Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span id="errorMessage"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 <script>
 // Update order status
 function updateOrderStatus(orderId, status) {
@@ -507,19 +567,41 @@ function checkPathaoStatus(orderId) {
     });
 }
 
+// Helper functions for toasts
+function showSuccessToast(message) {
+    document.getElementById('toastMessage').textContent = message;
+    const toast = new bootstrap.Toast(document.getElementById('successToast'));
+    toast.show();
+}
+
+function showErrorToast(message) {
+    document.getElementById('errorMessage').textContent = message;
+    const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+    toast.show();
+}
+
 // Simulate shipment progress (for non-Pathao)
 document.addEventListener('DOMContentLoaded', function() {
     const simulateBtn = document.getElementById('simulateBtn');
+    const confirmBtn = document.getElementById('confirmSimulateBtn');
+    const modal = new bootstrap.Modal(document.getElementById('simulateProgressModal'));
+
     if (simulateBtn) {
+        // Show modal when simulate button is clicked
         simulateBtn.addEventListener('click', function() {
-            const shipmentId = this.getAttribute('data-shipment-id');
+            modal.show();
+        });
 
-            if (!confirm('Simulate shipment progress to next status?')) {
-                return;
-            }
+        // Handle confirmation
+        confirmBtn.addEventListener('click', function() {
+            const shipmentId = simulateBtn.getAttribute('data-shipment-id');
 
-            this.disabled = true;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
+            // Close modal
+            modal.hide();
+
+            // Disable button and show loading
+            simulateBtn.disabled = true;
+            simulateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
 
             fetch('<?= url('admin/orders/simulate-shipment') ?>/' + shipmentId, {
                 method: 'POST',
@@ -535,19 +617,20 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 if (data.success) {
-                    alert('Shipment progressed successfully!');
-                    location.reload();
+                    showSuccessToast('Shipment progressed successfully!');
+                    // Reload after a short delay to show the toast
+                    setTimeout(() => location.reload(), 1500);
                 } else {
-                    alert('Error: ' + (data.message || 'Failed to progress shipment'));
-                    this.disabled = false;
-                    this.innerHTML = '<i class="fas fa-forward me-1"></i> Simulate Progress';
+                    showErrorToast(data.message || 'Failed to progress shipment');
+                    simulateBtn.disabled = false;
+                    simulateBtn.innerHTML = '<i class="fas fa-forward me-1"></i> Simulate Progress';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error: ' + error.message);
-                this.disabled = false;
-                this.innerHTML = '<i class="fas fa-forward me-1"></i> Simulate Progress';
+                showErrorToast(error.message);
+                simulateBtn.disabled = false;
+                simulateBtn.innerHTML = '<i class="fas fa-forward me-1"></i> Simulate Progress';
             });
         });
     }
