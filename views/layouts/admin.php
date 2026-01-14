@@ -123,7 +123,7 @@
 
                     <li class="nav-header">Point of Sale</li>
                     <li class="nav-item">
-                        <a href="<?= url('admin/pos') ?>" class="nav-link <?= activeClass('admin/pos') ?>">
+                        <a href="<?= url('admin/pos/terminal') ?>" class="nav-link <?= activeClass('admin/pos/terminal') ?>">
                             <i class="fas fa-cash-register"></i>
                             <span>POS Terminal</span>
                         </a>

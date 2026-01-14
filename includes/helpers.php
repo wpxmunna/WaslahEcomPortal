@@ -111,7 +111,19 @@ function isActiveUrl(string $path): bool
 {
     $current = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
     $path = trim($path, '/');
-    return $current === $path || strpos($current, $path) === 0;
+
+    // Exact match
+    if ($current === $path) {
+        return true;
+    }
+
+    // Check if current starts with path followed by a slash (for child pages)
+    // This prevents 'admin/pos' from matching 'admin/pos/transactions'
+    if (strpos($current, $path . '/') === 0) {
+        return true;
+    }
+
+    return false;
 }
 
 /**
