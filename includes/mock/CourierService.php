@@ -128,6 +128,21 @@ class CourierService
 
         $updated = $this->db->fetch("SELECT * FROM shipments WHERE id = ?", [$shipmentId]);
 
+        // Update order status based on new shipment status
+        $order = $this->db->fetch("SELECT * FROM orders WHERE id = ?", [$shipment['order_id']]);
+
+        if ($order) {
+            $orderModel = new Order();
+
+            if ($updated['status'] === 'picked_up' || $updated['status'] === 'in_transit') {
+                $orderModel->updateStatus($order['id'], 'shipped');
+            } elseif ($updated['status'] === 'out_for_delivery') {
+                $orderModel->updateStatus($order['id'], 'shipped');
+            } elseif ($updated['status'] === 'delivered') {
+                $orderModel->updateStatus($order['id'], 'delivered');
+            }
+        }
+
         return $this->successResponse([
             'previous_status' => $shipment['status'],
             'new_status' => $updated['status'],
