@@ -235,15 +235,15 @@ class Order extends Model
             'today_orders' => $this->db->count('orders', "store_id = ? AND DATE(created_at) = ?", [$storeId, $today]),
             'month_orders' => $this->db->count('orders', "store_id = ? AND created_at >= ?", [$storeId, $monthStart]),
             'total_revenue' => $this->db->fetch(
-                "SELECT SUM(total_amount) as total FROM orders WHERE store_id = ? AND payment_status = 'paid'",
+                "SELECT SUM(total_amount) as total FROM orders WHERE store_id = ? AND status NOT IN ('cancelled', 'refunded')",
                 [$storeId]
             )['total'] ?? 0,
             'today_revenue' => $this->db->fetch(
-                "SELECT SUM(total_amount) as total FROM orders WHERE store_id = ? AND payment_status = 'paid' AND DATE(created_at) = ?",
+                "SELECT SUM(total_amount) as total FROM orders WHERE store_id = ? AND status NOT IN ('cancelled', 'refunded') AND DATE(created_at) = ?",
                 [$storeId, $today]
             )['total'] ?? 0,
             'month_revenue' => $this->db->fetch(
-                "SELECT SUM(total_amount) as total FROM orders WHERE store_id = ? AND payment_status = 'paid' AND created_at >= ?",
+                "SELECT SUM(total_amount) as total FROM orders WHERE store_id = ? AND status NOT IN ('cancelled', 'refunded') AND created_at >= ?",
                 [$storeId, $monthStart]
             )['total'] ?? 0,
         ];
