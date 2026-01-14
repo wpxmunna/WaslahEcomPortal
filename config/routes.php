@@ -179,6 +179,8 @@ $router->add('admin/users/toggle/{id}', 'AdminUserController', 'toggle');
 // Admin Settings
 $router->add('admin/settings', 'AdminSettingsController', 'index');
 $router->add('admin/settings/update', 'AdminSettingsController', 'update');
+$router->add('admin/settings/general', 'AdminSettingsController', 'general');
+$router->add('admin/settings/update-general', 'AdminSettingsController', 'updateGeneral');
 $router->add('admin/settings/payment', 'AdminSettingsController', 'payment');
 $router->add('admin/settings/payment/update', 'AdminSettingsController', 'updatePayment');
 $router->add('admin/settings/email', 'AdminSettingsController', 'email');

@@ -13,12 +13,23 @@
 <!-- Quick Settings Menu -->
 <div class="row g-4 mb-4">
     <div class="col-md-3">
-        <a href="<?= url('admin/settings') ?>" class="text-decoration-none">
+        <a href="<?= url('admin/settings/general') ?>" class="text-decoration-none">
             <div class="card h-100 border-primary">
                 <div class="card-body text-center">
-                    <i class="fas fa-store fa-3x text-primary mb-3"></i>
+                    <i class="fas fa-cog fa-3x text-primary mb-3"></i>
+                    <h5>General</h5>
+                    <p class="text-muted small mb-0">Site name, tagline, and logo</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="<?= url('admin/settings') ?>" class="text-decoration-none">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-store fa-3x text-secondary mb-3"></i>
                     <h5>Store Settings</h5>
-                    <p class="text-muted small mb-0">Basic store information and currency</p>
+                    <p class="text-muted small mb-0">Store information and currency</p>
                 </div>
             </div>
         </a>
@@ -45,6 +56,8 @@
             </div>
         </a>
     </div>
+</div>
+<div class="row g-4 mb-4">
     <div class="col-md-3">
         <a href="<?= url('admin/settings/email') ?>" class="text-decoration-none">
             <div class="card h-100">

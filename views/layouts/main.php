@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?? SITE_NAME . ' - ' . SITE_TAGLINE ?></title>
-    <meta name="description" content="<?= $metaDescription ?? 'Waslah - Authenticity in Every Stitch. Quality fashion for Men, Women, and Children.' ?>">
+    <title><?= $pageTitle ?? siteName() . ' - ' . siteTagline() ?></title>
+    <meta name="description" content="<?= $metaDescription ?? siteName() . ' - ' . siteTagline() . '. Quality fashion for Men, Women, and Children.' ?>">
     <meta name="theme-color" content="#0F2027">
 
     <!-- Fonts - Premium Typography -->
@@ -101,7 +101,7 @@
 
                     <!-- Logo -->
                     <a href="<?= url() ?>" class="site-logo">
-                        <img src="<?= asset('images/logo.png') ?>" alt="<?= SITE_NAME ?>">
+                        <img src="<?= siteLogo() ?>" alt="<?= siteName() ?>">
                     </a>
 
                     <!-- Main Navigation -->
@@ -218,8 +218,8 @@
             <div class="container">
                 <div class="row">
                     <div class="col-lg-4 col-md-6 mb-4">
-                        <img src="<?= asset('images/logo.png') ?>" alt="Waslah" class="footer-logo mb-3">
-                        <p>Authenticity in Every Stitch. Quality clothing for Men, Women, and Children.</p>
+                        <img src="<?= siteLogo() ?>" alt="<?= siteName() ?>" class="footer-logo mb-3">
+                        <p><?= siteTagline() ?>. Quality clothing for Men, Women, and Children.</p>
                         <div class="social-links">
                             <?php if (!empty($socialLinksFooter)): ?>
                             <?php foreach ($socialLinksFooter as $link): ?>
@@ -323,7 +323,7 @@
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <p>&copy; <?= date('Y') ?> Waslah Fashion. All rights reserved.</p>
+                        <p>&copy; <?= date('Y') ?> <?= siteName() ?>. All rights reserved.</p>
                     </div>
                     <div class="col-md-6 text-end">
                         <a href="#">Privacy Policy</a>

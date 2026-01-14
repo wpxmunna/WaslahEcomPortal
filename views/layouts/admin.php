@@ -29,9 +29,9 @@
         <aside class="admin-sidebar">
             <div class="sidebar-header">
                 <a href="<?= url('admin') ?>" class="sidebar-brand">
-                    <img src="<?= asset('images/logo.png') ?>" alt="Waslah" class="admin-logo">
+                    <img src="<?= siteLogo() ?>" alt="<?= siteName() ?>" class="admin-logo">
                     <div class="brand-text">
-                        <span>WASLAH</span>
+                        <span><?= strtoupper(siteName()) ?></span>
                         <small>Admin Panel</small>
                     </div>
                 </a>

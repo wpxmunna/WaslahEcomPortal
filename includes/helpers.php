@@ -321,3 +321,65 @@ function getBusinessSettings(): array
 
     return $settings;
 }
+
+/**
+ * Get site setting value (dynamic from database)
+ */
+function getSiteSetting(string $key, $default = null)
+{
+    static $settings = null;
+
+    if ($settings === null) {
+        try {
+            $db = new Database();
+            $storeId = Session::get('current_store_id', 1);
+            $rows = $db->fetchAll("SELECT setting_key, setting_value FROM settings WHERE store_id = ?", [$storeId]);
+
+            $settings = [];
+            foreach ($rows as $row) {
+                $settings[$row['setting_key']] = $row['setting_value'];
+            }
+        } catch (Exception $e) {
+            $settings = [];
+        }
+    }
+
+    if (isset($settings[$key])) {
+        return $settings[$key];
+    }
+
+    // Fallback to constants for backward compatibility
+    if ($key === 'site_name') {
+        return defined('SITE_NAME') ? SITE_NAME : $default;
+    }
+    if ($key === 'site_tagline') {
+        return defined('SITE_TAGLINE') ? SITE_TAGLINE : $default;
+    }
+
+    return $default;
+}
+
+/**
+ * Get dynamic site name
+ */
+function siteName(): string
+{
+    return getSiteSetting('site_name', SITE_NAME);
+}
+
+/**
+ * Get dynamic site tagline
+ */
+function siteTagline(): string
+{
+    return getSiteSetting('site_tagline', SITE_TAGLINE);
+}
+
+/**
+ * Get dynamic site logo
+ */
+function siteLogo(): string
+{
+    $logo = getSiteSetting('site_logo', 'images/logo.png');
+    return asset($logo);
+}

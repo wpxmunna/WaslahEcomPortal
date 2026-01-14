@@ -285,4 +285,85 @@ class AdminSettingsController extends Controller
         Session::setFlash('success', 'Business information updated successfully');
         $this->redirect('admin/settings/business');
     }
+
+    /**
+     * General site settings (name, tagline, logo)
+     */
+    public function general()
+    {
+        $storeId = Session::get('admin_store_id', 1);
+
+        // Get current settings
+        $settings = $this->db->fetchAll(
+            "SELECT setting_key, setting_value FROM settings WHERE store_id = ?",
+            [$storeId]
+        );
+
+        $settingsArray = [];
+        foreach ($settings as $setting) {
+            $settingsArray[$setting['setting_key']] = $setting['setting_value'];
+        }
+
+        $this->view('admin/settings/general', [
+            'pageTitle' => 'General Settings',
+            'settings' => $settingsArray
+        ], 'admin');
+    }
+
+    /**
+     * Update general site settings
+     */
+    public function updateGeneral()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/settings/general');
+        }
+
+        if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
+            Session::setFlash('error', 'Invalid request');
+            $this->redirect('admin/settings/general');
+            return;
+        }
+
+        $storeId = Session::get('admin_store_id', 1);
+
+        // Handle logo upload
+        $logoPath = null;
+        if (!empty($_FILES['site_logo']['name']) && $_FILES['site_logo']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = ROOT_PATH . '/public/images/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $extension = pathinfo($_FILES['site_logo']['name'], PATHINFO_EXTENSION);
+            $filename = 'logo.' . $extension;
+            $filepath = $uploadDir . $filename;
+
+            if (move_uploaded_file($_FILES['site_logo']['tmp_name'], $filepath)) {
+                $logoPath = 'images/' . $filename;
+            }
+        }
+
+        // Update settings
+        $settingsToUpdate = [
+            'site_name' => trim($_POST['site_name'] ?? ''),
+            'site_tagline' => trim($_POST['site_tagline'] ?? ''),
+        ];
+
+        if ($logoPath) {
+            $settingsToUpdate['site_logo'] = $logoPath;
+        }
+
+        foreach ($settingsToUpdate as $key => $value) {
+            $this->db->query(
+                "INSERT INTO settings (store_id, setting_key, setting_value)
+                 VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE setting_value = ?",
+                [$storeId, $key, $value, $value]
+            );
+        }
+
+        Session::setFlash('success', 'General settings updated successfully');
+        $this->redirect('admin/settings/general');
+    }
 }
