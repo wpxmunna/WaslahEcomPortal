@@ -240,7 +240,7 @@
                 <?php endif; ?>
 
                 <?php if ($order['shipment']['status'] !== 'delivered'): ?>
-                <button class="btn btn-sm btn-outline-primary" onclick="simulateShipment(<?= $order['shipment']['id'] ?>)">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="simulateBtn" data-shipment-id="<?= $order['shipment']['id'] ?>">
                     <i class="fas fa-forward me-1"></i> Simulate Progress
                 </button>
                 <?php endif; ?>
@@ -508,17 +508,50 @@ function checkPathaoStatus(orderId) {
 }
 
 // Simulate shipment progress (for non-Pathao)
-function simulateShipment(shipmentId) {
-    fetch('<?= url('api/shipment/progress') ?>/' + shipmentId, {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    });
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const simulateBtn = document.getElementById('simulateBtn');
+    if (simulateBtn) {
+        simulateBtn.addEventListener('click', function() {
+            const shipmentId = this.getAttribute('data-shipment-id');
+
+            if (!confirm('Simulate shipment progress to next status?')) {
+                return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
+
+            fetch('<?= url('admin/orders/simulate-shipment') ?>/' + shipmentId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('Shipment progressed successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to progress shipment'));
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-forward me-1"></i> Simulate Progress';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-forward me-1"></i> Simulate Progress';
+            });
+        });
+    }
+});
 
 // Update shipping details
 function updateShipping(orderId) {

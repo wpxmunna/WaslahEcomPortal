@@ -360,4 +360,27 @@ class AdminOrderController extends Controller
 
         $this->json(['success' => true, 'message' => 'Notes saved']);
     }
+
+    /**
+     * Simulate shipment progress (AJAX)
+     * Progresses shipment to next status for testing purposes
+     */
+    public function simulateShipmentProgress(int $shipmentId): void
+    {
+        $courierService = new CourierService();
+        $result = $courierService->simulateProgress($shipmentId);
+
+        if ($result['success']) {
+            $this->json([
+                'success' => true,
+                'message' => 'Shipment progressed successfully',
+                'data' => $result['data']
+            ]);
+        } else {
+            $this->json([
+                'success' => false,
+                'message' => $result['error'] ?? 'Failed to progress shipment'
+            ]);
+        }
+    }
 }
