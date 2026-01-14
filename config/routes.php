@@ -182,6 +182,8 @@ $router->add('admin/settings/payment', 'AdminSettingsController', 'payment');
 $router->add('admin/settings/payment/update', 'AdminSettingsController', 'updatePayment');
 $router->add('admin/settings/email', 'AdminSettingsController', 'email');
 $router->add('admin/settings/email/update', 'AdminSettingsController', 'updateEmail');
+$router->add('admin/settings/business', 'AdminSettingsController', 'business');
+$router->add('admin/settings/update-business', 'AdminSettingsController', 'updateBusiness');
 
 // Admin Expenses (ERP)
 $router->add('admin/expenses', 'AdminExpenseController', 'index');

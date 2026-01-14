@@ -362,6 +362,7 @@
             const wrapper = document.getElementById('adminWrapper');
             const toggleBtn = document.getElementById('sidebarToggle');
             const overlay = document.getElementById('sidebarOverlay');
+            const sidebarNav = document.querySelector('.sidebar-nav');
 
             // Toggle sidebar
             toggleBtn?.addEventListener('click', function() {
@@ -398,6 +399,39 @@
                     }
                 }, 250);
             });
+
+            // Sidebar scroll position persistence
+            if (sidebarNav) {
+                // Restore scroll position on page load
+                const savedScrollPos = sessionStorage.getItem('sidebarScrollPos');
+                if (savedScrollPos) {
+                    sidebarNav.scrollTop = parseInt(savedScrollPos, 10);
+                } else {
+                    // Scroll active item into view on first load
+                    const activeItem = sidebarNav.querySelector('.nav-link.active');
+                    if (activeItem) {
+                        setTimeout(() => {
+                            activeItem.scrollIntoView({ block: 'center', behavior: 'instant' });
+                        }, 50);
+                    }
+                }
+
+                // Save scroll position before navigating
+                sidebarNav.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        sessionStorage.setItem('sidebarScrollPos', sidebarNav.scrollTop);
+                    });
+                });
+
+                // Also save on scroll (debounced)
+                let scrollTimer;
+                sidebarNav.addEventListener('scroll', function() {
+                    clearTimeout(scrollTimer);
+                    scrollTimer = setTimeout(() => {
+                        sessionStorage.setItem('sidebarScrollPos', sidebarNav.scrollTop);
+                    }, 100);
+                });
+            }
         })();
 
         // Initialize tooltips

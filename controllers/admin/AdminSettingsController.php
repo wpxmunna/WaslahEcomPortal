@@ -3,11 +3,13 @@
 class AdminSettingsController extends Controller
 {
     private $storeModel;
+    private $businessSettingModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->storeModel = new Store();
+        $this->businessSettingModel = new BusinessSetting();
 
         // Check admin authentication
         if (!Auth::check() || !Auth::isAdmin()) {
@@ -238,5 +240,49 @@ class AdminSettingsController extends Controller
         }
 
         return ['success' => false, 'error' => 'Upload failed'];
+    }
+
+    /**
+     * Business information settings
+     */
+    public function business(): void
+    {
+        $storeId = Session::get('admin_store_id', 1);
+        $businessSettings = $this->businessSettingModel->getGrouped($storeId);
+
+        $this->view('admin/settings/business', [
+            'pageTitle' => 'Business Information - Settings',
+            'businessSettings' => $businessSettings
+        ], 'admin');
+    }
+
+    /**
+     * Update business settings
+     */
+    public function updateBusiness(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('admin/settings/business');
+            return;
+        }
+
+        // Verify CSRF
+        if (!Session::validateCsrf($_POST['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid request');
+            $this->redirect('admin/settings/business');
+            return;
+        }
+
+        $storeId = Session::get('admin_store_id', 1);
+
+        // Get all posted settings (excluding csrf_token)
+        $settings = $_POST;
+        unset($settings['csrf_token']);
+
+        // Update settings
+        $this->businessSettingModel->updateBulk($storeId, $settings);
+
+        Session::flash('success', 'Business information updated successfully');
+        $this->redirect('admin/settings/business');
     }
 }

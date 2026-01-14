@@ -1,5 +1,61 @@
 <div class="page-header">
-    <h1>Settings</h1>
+    <div>
+        <h1><i class="fas fa-cog me-2"></i>Settings</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<?= url('admin') ?>">Dashboard</a></li>
+                <li class="breadcrumb-item active">Settings</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Quick Settings Menu -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <a href="<?= url('admin/settings') ?>" class="text-decoration-none">
+            <div class="card h-100 border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-store fa-3x text-primary mb-3"></i>
+                    <h5>Store Settings</h5>
+                    <p class="text-muted small mb-0">Basic store information and currency</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="<?= url('admin/settings/business') ?>" class="text-decoration-none">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-building fa-3x text-info mb-3"></i>
+                    <h5>Business Info</h5>
+                    <p class="text-muted small mb-0">Social links, contacts, and URLs</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="<?= url('admin/settings/payment') ?>" class="text-decoration-none">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-credit-card fa-3x text-success mb-3"></i>
+                    <h5>Payment</h5>
+                    <p class="text-muted small mb-0">Payment methods and gateway</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="<?= url('admin/settings/email') ?>" class="text-decoration-none">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-envelope fa-3x text-warning mb-3"></i>
+                    <h5>Email</h5>
+                    <p class="text-muted small mb-0">SMTP and email configuration</p>
+                </div>
+            </div>
+        </a>
+    </div>
 </div>
 
 <form action="<?= url('admin/settings/update') ?>" method="POST" enctype="multipart/form-data">

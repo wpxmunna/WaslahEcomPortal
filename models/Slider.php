@@ -98,7 +98,7 @@ class Slider extends Model
         // Get slider to delete image if exists
         $slider = $this->find($id);
         if ($slider && $slider['image']) {
-            $imagePath = ROOT_PATH . '/public/uploads/sliders/' . $slider['image'];
+            $imagePath = ROOT_PATH . '/uploads/sliders/' . $slider['image'];
             if (file_exists($imagePath)) {
                 unlink($imagePath);
             }

@@ -170,7 +170,7 @@ class AdminSliderController extends Controller
             if ($imageName) {
                 // Delete old image
                 if ($slider['image']) {
-                    $oldPath = ROOT_PATH . '/public/uploads/sliders/' . $slider['image'];
+                    $oldPath = ROOT_PATH . '/uploads/sliders/' . $slider['image'];
                     if (file_exists($oldPath)) {
                         unlink($oldPath);
                     }
@@ -254,7 +254,7 @@ class AdminSliderController extends Controller
             return null;
         }
 
-        $uploadDir = ROOT_PATH . '/public/uploads/sliders/';
+        $uploadDir = ROOT_PATH . '/uploads/sliders/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
