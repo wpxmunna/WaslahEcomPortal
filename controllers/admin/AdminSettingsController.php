@@ -66,9 +66,8 @@ class AdminSettingsController extends Controller
         $this->storeModel->update($storeId, $storeData);
 
         // Update settings
+        // Note: currency_symbol and currency_code are now configured in config/config.php
         $settingsToSave = [
-            'currency_symbol' => $_POST['currency_symbol'] ?? '$',
-            'currency_code' => $_POST['currency_code'] ?? 'USD',
             'tax_rate' => (float)($_POST['tax_rate'] ?? 0),
             'free_shipping_threshold' => (float)($_POST['free_shipping_threshold'] ?? 0),
             'default_shipping_cost' => (float)($_POST['default_shipping_cost'] ?? 0),

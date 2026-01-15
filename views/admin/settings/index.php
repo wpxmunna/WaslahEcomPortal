@@ -131,18 +131,13 @@
             <div class="card mb-4">
                 <div class="card-header">Currency & Pricing</div>
                 <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Currency Settings:</strong> Currency symbol and code are configured in <code>config/config.php</code>
+                        <br><small>Current: <strong><?= CURRENCY_SYMBOL ?></strong> (<?= CURRENCY_CODE ?>)</small>
+                    </div>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Currency Symbol</label>
-                            <input type="text" class="form-control" name="currency_symbol"
-                                   value="<?= sanitize($settings['currency_symbol'] ?? CURRENCY_SYMBOL) ?>" maxlength="5">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Currency Code</label>
-                            <input type="text" class="form-control" name="currency_code"
-                                   value="<?= sanitize($settings['currency_code'] ?? CURRENCY_CODE) ?>" maxlength="3">
-                        </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-12 mb-3">
                             <label class="form-label">Tax Rate (%)</label>
                             <input type="number" class="form-control" name="tax_rate"
                                    step="0.01" min="0" max="100"

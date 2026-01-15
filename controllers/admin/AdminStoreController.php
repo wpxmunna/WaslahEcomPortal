@@ -61,10 +61,9 @@ class AdminStoreController extends Controller
             'email' => $this->post('email'),
             'phone' => $this->post('phone'),
             'address' => $this->post('address'),
-            'currency_code' => $this->post('currency_code', 'USD'),
-            'currency_symbol' => $this->post('currency_symbol', '$'),
             'tax_rate' => (float) $this->post('tax_rate', 0),
             'status' => $this->post('status') ? 1 : 0
+            // Note: currency_code and currency_symbol removed - now configured in config/config.php
         ];
 
         // Handle logo upload
@@ -119,10 +118,9 @@ class AdminStoreController extends Controller
             'email' => $this->post('email'),
             'phone' => $this->post('phone'),
             'address' => $this->post('address'),
-            'currency_code' => $this->post('currency_code', 'USD'),
-            'currency_symbol' => $this->post('currency_symbol', '$'),
             'tax_rate' => (float) $this->post('tax_rate', 0),
             'status' => $this->post('status') ? 1 : 0
+            // Note: currency_code and currency_symbol removed - now configured in config/config.php
         ];
 
         // Handle logo upload
