@@ -13,7 +13,7 @@ class Auth
     }
 
     /**
-     * Check if user is logged in (static)
+     * Check if user is logged in (static) - for frontend customer
      */
     public static function check(): bool
     {
@@ -21,16 +21,15 @@ class Auth
     }
 
     /**
-     * Check if logged in user is admin (static)
+     * Check if admin is logged in (static)
      */
     public static function isAdmin(): bool
     {
-        $user = Session::getUser();
-        return $user && in_array($user['role'] ?? '', ['admin', 'manager']);
+        return Session::isAdmin();
     }
 
     /**
-     * Get current user (static)
+     * Get current user (static) - frontend customer
      */
     public static function user(): ?array
     {
@@ -38,12 +37,29 @@ class Auth
     }
 
     /**
-     * Get current user ID (static)
+     * Get current user ID (static) - frontend customer
      */
     public static function id(): ?int
     {
         $user = Session::getUser();
         return $user ? (int)$user['id'] : null;
+    }
+
+    /**
+     * Get current admin user (static)
+     */
+    public static function admin(): ?array
+    {
+        return Session::getAdmin();
+    }
+
+    /**
+     * Get current admin ID (static)
+     */
+    public static function adminId(): ?int
+    {
+        $admin = Session::getAdmin();
+        return $admin ? (int)$admin['id'] : null;
     }
 
     /**

@@ -10,7 +10,7 @@ class AdminReturnController extends Controller
         $this->returnModel = new ProductReturn();
 
         // Check admin authentication (allows both admin and manager)
-        if (!Auth::check() || !Auth::isAdmin()) {
+        if (!Auth::isAdmin()) {
             $this->redirect('admin/login');
         }
     }

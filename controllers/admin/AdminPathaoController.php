@@ -9,7 +9,7 @@ class AdminPathaoController extends Controller
         parent::__construct();
 
         // Check admin authentication
-        if (!Auth::check() || !Auth::isAdmin()) {
+        if (!Auth::isAdmin()) {
             $this->redirect('admin/login');
         }
 

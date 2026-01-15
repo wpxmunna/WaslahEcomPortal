@@ -12,7 +12,7 @@ class AdminSettingsController extends Controller
         $this->businessSettingModel = new BusinessSetting();
 
         // Check admin authentication
-        if (!Auth::check() || !Auth::isAdmin()) {
+        if (!Auth::isAdmin()) {
             $this->redirect('admin/login');
         }
 
