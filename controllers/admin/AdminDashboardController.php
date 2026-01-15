@@ -60,15 +60,10 @@ class AdminDashboardController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auth = new Auth();
 
-            if ($auth->attempt($this->post('email'), $this->post('password'))) {
-                if (Session::isAdmin()) {
-                    $this->redirect('admin', 'Welcome back!');
-                } else {
-                    $auth->logout();
-                    $this->data['error'] = 'Admin access required';
-                }
+            if ($auth->attemptAdmin($this->post('email'), $this->post('password'))) {
+                $this->redirect('admin', 'Welcome back!');
             } else {
-                $this->data['error'] = 'Invalid credentials';
+                $this->data['error'] = 'Invalid credentials or insufficient permissions';
             }
         }
 
@@ -85,7 +80,7 @@ class AdminDashboardController extends Controller
      */
     public function logout(): void
     {
-        (new Auth())->logout();
+        (new Auth())->logoutAdmin();
         $this->redirect('admin/login', 'Logged out successfully');
     }
 }

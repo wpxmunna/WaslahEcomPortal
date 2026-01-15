@@ -32,6 +32,12 @@ class Controller
      */
     protected function view(string $view, array $data = [], ?string $layout = 'main'): void
     {
+        // Override user data for admin layout
+        if ($layout === 'admin') {
+            $this->data['user'] = Session::getAdmin();
+            $this->data['isLoggedIn'] = Session::isAdmin();
+        }
+
         $data = array_merge($this->data, $data);
         extract($data);
 

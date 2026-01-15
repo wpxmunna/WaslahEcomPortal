@@ -47,7 +47,7 @@ class Auth
     }
 
     /**
-     * Attempt to login user
+     * Attempt to login user (frontend customer)
      */
     public function attempt(string $email, string $password): bool
     {
@@ -71,6 +71,36 @@ class Auth
         unset($user['password']);
 
         Session::setUser($user);
+        Session::regenerate();
+
+        return true;
+    }
+
+    /**
+     * Attempt to login admin
+     */
+    public function attemptAdmin(string $email, string $password): bool
+    {
+        $user = $this->db->fetch(
+            "SELECT * FROM users WHERE email = ? AND status = 1 AND role IN ('admin', 'manager')",
+            [$email]
+        );
+
+        if (!$user) {
+            return false;
+        }
+
+        if (!password_verify($password, $user['password'])) {
+            return false;
+        }
+
+        // Update last login
+        $this->db->update('users', ['last_login' => date('Y-m-d H:i:s')], 'id = ?', [$user['id']]);
+
+        // Remove password from session data
+        unset($user['password']);
+
+        Session::setAdmin($user);
         Session::regenerate();
 
         return true;
@@ -102,11 +132,19 @@ class Auth
     }
 
     /**
-     * Logout user
+     * Logout user (frontend customer)
      */
     public function logout(): void
     {
-        Session::destroy();
+        Session::logoutUser();
+    }
+
+    /**
+     * Logout admin
+     */
+    public function logoutAdmin(): void
+    {
+        Session::logoutAdmin();
     }
 
     /**

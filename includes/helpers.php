@@ -267,7 +267,7 @@ function logMessage(string $message, string $level = 'info'): void
  */
 function isFullAdmin(): bool
 {
-    $user = Session::getUser();
+    $user = Session::getAdmin();
     return ($user['role'] ?? '') === 'admin';
 }
 

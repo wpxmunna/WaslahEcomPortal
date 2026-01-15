@@ -68,7 +68,7 @@ class Session
     }
 
     /**
-     * Check if user is logged in
+     * Check if user is logged in (frontend customer)
      */
     public static function isLoggedIn(): bool
     {
@@ -76,15 +76,15 @@ class Session
     }
 
     /**
-     * Check if user is admin
+     * Check if admin is logged in
      */
     public static function isAdmin(): bool
     {
-        return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+        return isset($_SESSION['admin_id']);
     }
 
     /**
-     * Get current user ID
+     * Get current user ID (frontend customer)
      */
     public static function getUserId(): ?int
     {
@@ -92,7 +92,7 @@ class Session
     }
 
     /**
-     * Get current user data
+     * Get current user data (frontend customer)
      */
     public static function getUser(): ?array
     {
@@ -100,18 +100,64 @@ class Session
     }
 
     /**
-     * Set user session
+     * Set user session (frontend customer)
      */
     public static function setUser(array $user): void
     {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user'] = $user;
-        // Allow both 'admin' and 'manager' roles to access admin panel
-        $_SESSION['is_admin'] = in_array($user['role'] ?? 'customer', ['admin', 'manager']);
-        // Set admin role for permission checks
-        $_SESSION['admin_role'] = $user['role'] ?? 'customer';
-        // Set admin store_id (default to 1)
+    }
+
+    /**
+     * Get current admin ID
+     */
+    public static function getAdminId(): ?int
+    {
+        return $_SESSION['admin_id'] ?? null;
+    }
+
+    /**
+     * Get current admin data
+     */
+    public static function getAdmin(): ?array
+    {
+        return $_SESSION['admin_user'] ?? null;
+    }
+
+    /**
+     * Set admin session
+     */
+    public static function setAdmin(array $user): void
+    {
+        // Only allow admin and manager roles
+        if (!in_array($user['role'] ?? '', ['admin', 'manager'])) {
+            return;
+        }
+
+        $_SESSION['admin_id'] = $user['id'];
+        $_SESSION['admin_user'] = $user;
+        $_SESSION['admin_role'] = $user['role'];
         $_SESSION['admin_store_id'] = $user['store_id'] ?? 1;
+    }
+
+    /**
+     * Logout user (frontend customer)
+     */
+    public static function logoutUser(): void
+    {
+        unset($_SESSION['user_id']);
+        unset($_SESSION['user']);
+    }
+
+    /**
+     * Logout admin
+     */
+    public static function logoutAdmin(): void
+    {
+        unset($_SESSION['admin_id']);
+        unset($_SESSION['admin_user']);
+        unset($_SESSION['admin_role']);
+        unset($_SESSION['admin_store_id']);
     }
 
     /**
