@@ -1,9 +1,9 @@
 RewriteEngine On
-RewriteBase /WaslahEcomPortal/
+RewriteBase /
 
-# Redirect to HTTPS (uncomment in production)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# Redirect to HTTPS (production)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Remove trailing slash
 RewriteCond %{REQUEST_FILENAME} !-d
