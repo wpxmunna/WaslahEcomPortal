@@ -7,7 +7,7 @@
 define('SITE_NAME', 'Waslah');
 define('SITE_TAGLINE', 'Authenticity in Every Stitch');
 define('SITE_LOGO', 'images/logo.png'); // Path relative to public folder
-define('SITE_URL', 'http://localhost:8000');
+define('SITE_URL', 'https://waslah.gt.tc');
 define('SITE_EMAIL', 'info@waslah.com');
 
 // Paths
