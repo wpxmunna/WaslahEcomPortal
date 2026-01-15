@@ -30,3 +30,4 @@ Thumbs.db
 
 # Sensitive files
 config/database.local.php
+config/database.php
