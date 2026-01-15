@@ -20,6 +20,11 @@ ini_set('log_errors', 1);
 // Start session
 session_start();
 
+// Clear opcode cache (remove after first load)
+if (function_exists('opcache_invalidate')) {
+    opcache_invalidate(__DIR__ . '/config/config.php', true);
+}
+
 // Load configuration
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/database.php';
