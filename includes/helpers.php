@@ -28,13 +28,19 @@ function upload(string $path): string
 }
 
 /**
+ * Get currency symbol (safe HTML entity version)
+ */
+function currencySymbol(): string
+{
+    return CURRENCY_SYMBOL;
+}
+
+/**
  * Format price
  */
 function formatPrice(float $price): string
 {
-    // Use HTML entity for Taka symbol to avoid encoding issues
-    $symbol = (CURRENCY_SYMBOL === '৳') ? '&#2547;' : CURRENCY_SYMBOL;
-    return $symbol . ' ' . number_format($price, 2);
+    return CURRENCY_SYMBOL . ' ' . number_format($price, 2);
 }
 
 /**
