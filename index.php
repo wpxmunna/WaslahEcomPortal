@@ -7,6 +7,11 @@
 // Start output buffering first to prevent "headers already sent" errors
 ob_start();
 
+// Set UTF-8 encoding for proper character display
+header('Content-Type: text/html; charset=UTF-8');
+mb_internal_encoding('UTF-8');
+mb_http_output('UTF-8');
+
 // Error reporting (disable in production)
 error_reporting(E_ALL);
 ini_set('display_errors', 0); // Disabled for production

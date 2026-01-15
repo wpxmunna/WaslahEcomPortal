@@ -24,6 +24,12 @@ RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 # Deny access to directories
 Options -Indexes
 
+# UTF-8 encoding
+AddDefaultCharset UTF-8
+<IfModule mod_mime.c>
+    AddCharset UTF-8 .html .css .js .xml .json .rss .atom .php
+</IfModule>
+
 # Security headers
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"

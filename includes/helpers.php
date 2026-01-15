@@ -32,7 +32,9 @@ function upload(string $path): string
  */
 function formatPrice(float $price): string
 {
-    return CURRENCY_SYMBOL . number_format($price, 2);
+    // Use HTML entity for Taka symbol to avoid encoding issues
+    $symbol = (CURRENCY_SYMBOL === '৳') ? '&#2547;' : CURRENCY_SYMBOL;
+    return $symbol . ' ' . number_format($price, 2);
 }
 
 /**
