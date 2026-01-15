@@ -16,8 +16,7 @@ define('UPLOAD_PATH', ROOT_PATH . '/uploads');
 define('VIEW_PATH', ROOT_PATH . '/views');
 
 // Currency (Bangladeshi Taka)
-// Using HTML entity &#2547; for Taka symbol to avoid encoding issues
-define('CURRENCY_SYMBOL', '&#2547;');
+define('CURRENCY_SYMBOL', 'BDT');
 define('CURRENCY_CODE', 'BDT');
 
 // Pagination
